@@ -21,11 +21,20 @@ public class ChatActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    HecongChatConfig config = new HecongChatConfig("https://<app渠道对话链接>");
+    // 只要渠道 ID(工作台的 App 渠道页复制)——**不是对话链接 URL**:页面由壳内置骨架承载,
+    // 渠道 ID 决定连哪个渠道(2026-08-17 改版,租户零域名接入)
+    HecongChatConfig config = new HecongChatConfig("你的渠道ID");
     chat = new HecongChatView(this); // 必须 Activity context(文件选择/权限都要它)
     chat.listener = new HecongChatListener() {
       @Override
       public void onUnreadChanged(int count) { /* 更新角标 */ }
+
+      // 会话事件通吃入口(消息到达 / 对话起止 / 网络通断)——**优先接这个**:
+      // 以后 H5 新增的事件不用升级 SDK 就能收到。事件名与网页版 hc.on() 同名。
+      @Override
+      public void onEvent(String name, JSONObject payload) {
+        // 例:"message:incoming".equals(name) → 弹本地通知
+      }
     };
     setContentView(chat);
     chat.load(config); // 合规:用户同意隐私政策后再调,此前 SDK 零活动
