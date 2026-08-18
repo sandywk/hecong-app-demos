@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 示范 APP 图标:强调色圆角方章 + 白色对话轮廓(lucide message-circle,与 demo 同源) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp"
+    android:viewportWidth="48" android:viewportHeight="48">
+  <path android:pathData="M10,0 h28 a10,10 0 0 1 10,10 v28 a10,10 0 0 1 -10,10 h-28 a10,10 0 0 1 -10,-10 v-28 a10,10 0 0 1 10,-10 Z"
+      android:fillColor="#4F46E5" />
+  <group android:translateX="10.2" android:translateY="10.2"
+      android:scaleX="1.15" android:scaleY="1.15">
+    <path android:pathData="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"
+        android:strokeColor="#FFFFFF" android:strokeWidth="2"
+        android:strokeLineCap="round" android:strokeLineJoin="round" />
+  </group>
+</vector>

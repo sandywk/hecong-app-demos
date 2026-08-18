@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 设计 token · 浅色档(事实源:design/exports/app-demo-04-spec.png 第 4 屏色板)。
+     深色档在 values-night/colors.xml,名字一一对应 —— 代码只认名字,不认具体色值。 -->
+<resources>
+  <color name="accent">#4F46E5</color>
+  <color name="accent_soft">#EEEDFC</color>
+  <color name="danger">#E5484D</color>
+  <color name="ink">#0F1420</color>
+  <color name="ink2">#5B6577</color>
+  <color name="ink3">#9AA3B2</color>
+  <color name="line">#EDF0F5</color>
+  <color name="surface">#FFFFFF</color>
+  <color name="bg">#F5F7FA</color>
+  <color name="chevron">#C7CEDA</color>
+  <color name="skeleton">#E7EBF2</color>
+  <color name="scrim">#990F1420</color>
+  <color name="grabber">#D6DBE4</color>
+
+</resources>

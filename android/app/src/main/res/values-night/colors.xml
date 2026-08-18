@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 设计 token · 深色档。accent/danger 跨档不变(强调色只有一个,落地纪律第 5 条)。 -->
+<resources>
+  <color name="accent_soft">#2A2952</color>
+  <color name="ink">#F2F4F8</color>
+  <color name="ink2">#9AA3B2</color>
+  <color name="ink3">#7B8494</color>
+  <color name="line">#24262D</color>
+  <color name="surface">#17181D</color>
+  <color name="bg">#0E0F13</color>
+  <color name="chevron">#3A3D46</color>
+  <color name="skeleton">#24262D</color>
+  <color name="grabber">#3A3D46</color>
+</resources>

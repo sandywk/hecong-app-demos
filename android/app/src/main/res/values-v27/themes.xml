@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 由 values/themes.xml 的 Base 派生,只补本 API 档才有的系统栏图标明暗开关。
+     浅色档状态栏底色是白的 → 图标必须转深色,否则白底白字(时间/信号/电量全看不见)。 -->
+<resources>
+  <style name="Theme.Demo" parent="Base.Theme.Demo">
+    <item name="android:windowLightStatusBar">true</item>
+    <item name="android:windowLightNavigationBar">true</item>
+  </style>
+</resources>

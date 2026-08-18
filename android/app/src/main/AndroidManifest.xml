@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 权限说明(给租户开发者):SDK 自身零权限声明,下面两条由宿主 APP 按用到的功能声明,
+     并配合运行时申请(转发见 ChatActivity)。不用语音/拍摄就删掉对应行。 -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+  <uses-permission android:name="android.permission.CAMERA" />
+
+  <application
+      android:name=".DemoApp"
+      android:label="Hecong Chat Demo"
+      android:icon="@drawable/ic_launcher"
+      android:theme="@style/Theme.Demo">
+    <!-- 键盘标准(adjustResize)已由壳视图 attach 时**代码级焊死**(压过任何 manifest/全局
+         配置,租户无需也不必声明)—— 本示范刻意不声明,以实证"租户全局键盘配置千奇百怪
+         也影响不到壳页面"。细则 native/keyboard-and-viewport.md -->
+    <activity android:name=".MainActivity" android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+    <activity android:name=".ChatActivity" android:exported="false" />
+    <activity android:name=".DiagnosticsActivity" android:exported="false" />
+    <!-- 租户自绘标题栏示范(左原生返回 + 右头像昵称签名;桥协议 §四 header-identity) -->
+    <activity android:name=".CustomHeaderChatActivity" android:exported="false" />
+    <!-- 底部弹层用的是 Dialog,不需要单独声明 Activity -->
+  </application>
+</manifest>

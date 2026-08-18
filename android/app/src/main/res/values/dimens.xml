@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 尺寸 token(设计稿第 4 屏「尺寸与间距」)。代码不写裸数字,一律引这里。 -->
+<resources>
+  <dimen name="page_side">16dp</dimen>       <!-- 页面左右边距 -->
+  <dimen name="card_pad">18dp</dimen>        <!-- 卡片内边距 -->
+  <dimen name="card_radius">16dp</dimen>     <!-- 卡片圆角 -->
+  <dimen name="chip_size">34dp</dimen>       <!-- 图标章边长 -->
+  <dimen name="chip_radius">10dp</dimen>     <!-- 图标章圆角 -->
+  <dimen name="row_min_height">48dp</dimen>  <!-- 列表行最小高度 -->
+  <dimen name="group_gap">18dp</dimen>       <!-- 分组间距 -->
+  <dimen name="icon_sm">18dp</dimen>
+  <dimen name="icon_md">20dp</dimen>
+  <dimen name="icon_lg">22dp</dimen>
+  <dimen name="icon_xl">24dp</dimen>
+</resources>

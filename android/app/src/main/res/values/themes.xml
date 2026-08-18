@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 示范 APP 主题:DayNight + 无 ActionBar(所有顶栏自绘,系统栏样式一律不用 ——
+     落地纪律第 1 条:返回键必须是纯 chevron,系统 ActionBar 给不了)。
+
+     为什么拆 Base + 多个 -vNN 覆盖:系统栏**图标**的明暗开关有 API 门槛
+     (windowLightStatusBar 是 23+,windowLightNavigationBar 是 27+),而 demo minSdk = 21。
+     样式在不同 values-vNN 目录之间是**整体替换不是合并**,所以公共项收在 Base 里,
+     各档只补自己那两个开关。21/22 上系统栏图标固定浅色,无解也无害。 -->
+<resources>
+  <style name="Base.Theme.Demo" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <item name="android:windowBackground">@color/bg</item>
+    <item name="android:statusBarColor">@color/surface</item>
+    <item name="android:navigationBarColor">@color/surface</item>
+    <item name="colorAccent">@color/accent</item>
+  </style>
+
+  <style name="Theme.Demo" parent="Base.Theme.Demo" />
+
+  <!-- 底部弹层:透明窗 + 自绘卡片(不引 material BottomSheet,零依赖是本 demo 的卖点) -->
+  <style name="Theme.Demo.Sheet" parent="Theme.AppCompat.DayNight.Dialog">
+    <item name="android:windowBackground">@android:color/transparent</item>
+    <item name="android:windowIsFloating">false</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:backgroundDimEnabled">false</item>
+    <item name="android:windowAnimationStyle">@style/Anim.Sheet</item>
+  </style>
+  <style name="Anim.Sheet" parent="@android:style/Animation.Dialog">
+    <item name="android:windowEnterAnimation">@anim/sheet_enter</item>
+    <item name="android:windowExitAnimation">@anim/sheet_exit</item>
+  </style>
+</resources>

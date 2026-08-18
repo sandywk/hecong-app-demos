@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 仅 debug 变体:放行 http 明文(本地档 localhost demo 用)。release 不带,线上档全 https。 -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+  <application
+      android:usesCleartextTraffic="true"
+      tools:ignore="MissingApplicationIcon" />
+</manifest>
