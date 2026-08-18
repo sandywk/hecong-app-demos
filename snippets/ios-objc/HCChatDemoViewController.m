@@ -1,7 +1,14 @@
 // iOS ObjC 档 1 接入(demo 矩阵 #2):验证壳公共面 ObjC 互操作(app-sdk-plan.md §8.1)。
-// 壳公共类全部 NSObject 系 + @objc 导出,ObjC 工程经 Swift 桥接头直接用。
+// 壳公共类全部 NSObject 系 + @objc 导出,ObjC 工程可直接用。
+//
+// 🔴 **SPM 引入的 Swift 包在 ObjC 里用 `@import <模块名>;`(module import)**,
+// 不是 `#import <HecongChatSDK/HecongChatSDK-Swift.h>` —— 后者是 framework/CocoaPods 形态的
+// 写法,SPM 下那个头文件路径**不存在**,照抄会编译不过。
+// (2026-08-18 实测修正:本文件此前就是错的写法,随 CocoaPods 退役一并纠正。
+//  验证方式 = 在真 ObjC 文件里 @import 后调用全部公共面,xcodebuild 编译通过。)
+// 需要宿主工程开启 Clang 模块(`CLANG_ENABLE_MODULES = YES`,Xcode 新建工程默认就是开的)。
 #import "HCChatDemoViewController.h"
-#import <HecongChatSDK/HecongChatSDK-Swift.h>
+@import HecongChatSDK;
 
 @interface HCChatDemoViewController () <HecongChatDelegate>
 @property (nonatomic, strong) HecongChatViewController *chat;

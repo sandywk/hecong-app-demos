@@ -41,10 +41,14 @@ final class DiagnosticsViewController: UITableViewController {
   }
 
   private func appVariantLabel() -> String {
+    // 版本号**运行时读自己的 bundle**,不硬编码 —— 硬编码就是又一份会漂移的副本
+    // (2026-08-18 实测漂过:SDK 已 0.1.1,这里还显示 0.1.0)。
+    // MARKETING_VERSION 由 `pnpm native:bump` 从 native/version.json 同步进 pbxproj。
+    let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
     #if DEBUG
-    return "0.1.0 (debug)"
+    return "\(v) (debug)"
     #else
-    return "0.1.0 (release)"
+    return "\(v) (release)"
     #endif
   }
 

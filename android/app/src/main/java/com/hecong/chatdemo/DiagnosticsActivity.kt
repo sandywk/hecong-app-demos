@@ -28,7 +28,11 @@ class DiagnosticsActivity : AppCompatActivity() {
       "当前配置" to DemoConfig.describeProfile(this),
       "渠道 ID" to DemoConfig.describe(this),
       "访客标识" to (mirror ?: "(尚未建立 —— 第一次打开客服后生成)"),
-      "示范 App 版本" to "0.1.0 (${if (LocalEnv.channelIdOrNull != null) "debug" else "release"})",
+      // 版本号**运行时读自己的包**,不硬编码 —— 硬编码就是又一份会漂移的副本
+      // (2026-08-18 实测漂过:SDK 已 0.1.1,这里还显示 0.1.0)。
+      // versionName 由 build.gradle.kts 从 native/version.json 读,链路全程真同源。
+      "示范 App 版本" to
+        "${appVersionName()} (${if (LocalEnv.channelIdOrNull != null) "debug" else "release"})",
     )
 
     val body = column {
@@ -56,4 +60,9 @@ class DiagnosticsActivity : AppCompatActivity() {
       },
     )
   }
+
+  /** 读本 APP 自己的 versionName(真同源:build.gradle.kts ← native/version.json) */
+  private fun appVersionName(): String =
+    runCatching { packageManager.getPackageInfo(packageName, 0).versionName ?: "?" }
+      .getOrDefault("?")
 }
