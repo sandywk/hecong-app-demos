@@ -119,9 +119,16 @@ class CatalogActions(private val activity: MainActivity) {
 
   /** 演示用(接入时不需要):清掉本地缓存,验证"身份与聊天记录仍在"这个能力 */
   fun clearLocalData() {
-    WebStorage.getInstance().deleteAllData()
-    CookieManager.getInstance().removeAllCookies(null)
-    WebView(activity).apply { clearCache(true); destroy() }
+    // 这三行全部要求系统 WebView 可用 —— 被用户停用时会抛(同 HecongChatView.setupWebView 那族),
+    // 不兜住的话这个演示动作会把示范 APP 一起带崩
+    runCatching {
+      WebStorage.getInstance().deleteAllData()
+      CookieManager.getInstance().removeAllCookies(null)
+      WebView(activity).apply { clearCache(true); destroy() }
+    }.onFailure {
+      toast("系统 WebView 不可用,清不了缓存:${it.javaClass.simpleName}")
+      return
+    }
     toast("已清除本地缓存 —— 再打开客服,身份与聊天记录应该都还在")
   }
 
