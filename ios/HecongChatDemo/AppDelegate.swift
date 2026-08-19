@@ -83,6 +83,44 @@ final class DemoFacadeDelegate: NSObject, HecongChatDelegate {
     UIApplication.shared.applicationIconBadgeNumber = count
   }
 
+  /// **自定义按钮被点了** —— 这就是"点商品入口 → 弹商品列表"的接线处。
+  ///
+  /// 真实接入时你在这里做的是:去自己的系统取当前该展示的商品/订单,`setPickerData` 回填,
+  /// 再 `openPicker` 打开。
+  /// ⚠️ **数据必须在这一刻给,不能在打开聊天页之前提前给** —— SDK 刻意不缓存选择器数据
+  /// (库存/登录态都会变,缓存重放等于把陈旧列表推给下一个会话)。
+  func hecongChat(didClickAction id: String) {
+    switch id {
+    case DevCapabilityActions.actionProduct:
+      HecongChat.shared.setPickerData("product", items: DemoSampleData.products())
+      HecongChat.shared.openPicker("product")
+    case DevCapabilityActions.actionOrder:
+      HecongChat.shared.setPickerData("order", items: DemoSampleData.orders())
+      HecongChat.shared.openPicker("order")
+    default:
+      // 两个位置对比那两个按钮:只提示,说明"点了会回到你的代码里"
+      DemoStyle.toast("你点了自定义按钮「\(id)」—— 这里是你的代码")
+    }
+  }
+
+  /// **聊天页里任何"要往外跳"的动作都先经过这里** —— 客服发的网址、商品卡片的详情链接、
+  /// 电话号码、邮箱、页面内的跳转,统统先问你一次。
+  ///
+  /// 返回 `true` = 你自己处理了(SDK 什么都不做);返回 `false`/不实现 = SDK 用默认方式
+  /// (网址跳 Safari、电话跳拨号、邮箱跳邮件)。
+  ///
+  /// 下面这段是**分流范例**:自家商品链接 → 跳自己 APP 的原生页面;其余 → 交给系统。
+  func hecongChat(handleOpenUrl url: URL) -> Bool {
+    let prefix = DemoSampleData.demoSite + "/product/"
+    if url.absoluteString.hasPrefix(prefix) {
+      let productId = String(url.absoluteString.dropFirst(prefix.count))
+      // 真实接入这里换成你自己的路由跳转,例如 pushViewController(ProductDetailVC…)
+      DemoStyle.toast("拦截成功 → 这里跳你 APP 的商品详情页(商品 \(productId))")
+      return true // 我处理了,SDK 别再管
+    }
+    return false // 其余交给 SDK 默认处理(网址跳 Safari)
+  }
+
   func hecongChatDidChangeAnonymousId(_ anonymousId: String) {
     lastAnonymousId = anonymousId
     // 真实接入在这里:postToMyBackend(anonymousId, myPushToken)

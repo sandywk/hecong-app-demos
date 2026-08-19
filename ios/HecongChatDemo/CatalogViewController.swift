@@ -89,6 +89,26 @@ final class CatalogViewController: UITableViewController, HecongChatDelegate {
             : lines.joined(separator: "\n"))
       },
     ]),
+    ("开发者能力(工作台配不出来,要写代码)", [
+      Scene(title: "指定技能组 · 打开时", desc: "填组名 → 用它打开客服;老版本 SDK 也认(走地址参数)") {
+        DevCapabilityActions.openWithSkillGroup(on: $0)
+      },
+      Scene(title: "指定技能组 · 聊天中切换", desc: "聊到一半转专业组;留空可清除。新对话生效") {
+        DevCapabilityActions.switchSkillGroup(on: $0)
+      },
+      Scene(title: "商品选择器", desc: "附件面板加「商品」入口 → 点了弹商品列表(数据是你自己系统的)") {
+        DevCapabilityActions.demoProductPicker(on: $0)
+      },
+      Scene(title: "订单选择器", desc: "输入框正上方加「订单」入口 → 售后咨询直接选哪一单") {
+        DevCapabilityActions.demoOrderPicker(on: $0)
+      },
+      Scene(title: "自定义按钮 · 两个位置对比", desc: "附件面板(收着) vs 快捷区(显眼),一眼看出差别") {
+        DevCapabilityActions.demoBothSlots(on: $0)
+      },
+      Scene(title: "撤掉自定义按钮", desc: "演示 unregister;同名再注册 = 覆盖,不会重复") { _ in
+        DevCapabilityActions.clearActions()
+      },
+    ]),
     ("配置与诊断", [
       Scene(title: "渠道配置", desc: "填上你自己的渠道 ID,不改代码就能连到你的工作台") {
         $0.showChannelSettings()
@@ -122,10 +142,13 @@ final class CatalogViewController: UITableViewController, HecongChatDelegate {
 
   func pushChat(
     title: String? = nil, userId: String? = nil, colorScheme: String? = nil,
-    extraQuery: [String: String] = [:], hideNavBar: Bool = false
+    extraQuery: [String: String] = [:], hideNavBar: Bool = false,
+    routing: HecongRouting? = nil
   ) {
     guard ChannelSetup.ensureReady(on: self) else { return }
     let config = DemoConfig.buildChatConfig(extraQuery: extraQuery)
+    // 指派技能组(启动档):值会拼进聊天页地址,老版本壳也认
+    if let routing = routing { config.routing = routing }
     // 不传就用默认档(跟随 App);只有想强制某一档时才显式设
     if let colorScheme = colorScheme { config.colorScheme = colorScheme }
     let chat = HecongChatViewController(config: config)

@@ -42,6 +42,6 @@ android {
 
 dependencies {
   // ⬇️ 这一行就是接入所需的全部依赖声明
-  implementation("com.aihecong:hecong-chat-sdk:0.1.3")
+  implementation("com.aihecong:hecong-chat-sdk:0.2.0")
   implementation("androidx.appcompat:appcompat:1.6.1")
 }

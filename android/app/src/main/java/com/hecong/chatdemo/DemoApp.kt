@@ -38,17 +38,59 @@ class DemoApp : Application() {
         MainActivity.updateUnread(count)
       }
 
-      // ③ 未登录访客的离线推送靠这个号对上人
+      // ③ **自定义按钮被点了** —— 这就是"点商品入口 → 弹商品列表"的接线处。
+      // 真实接入时你在这里做的是:去自己的系统取当前该展示的商品/订单,
+      // `setPickerData` 回填,再 `openPicker` 打开。本 demo 数据是写死的假数据,
+      // 所以直接打开即可(数据在点按钮之前就已经喂进去了)。
+      override fun onActionClick(id: String) {
+        when (id) {
+          // ⚠️ **数据必须在这一刻给,不能在打开聊天页之前提前给** —— SDK 刻意不缓存
+          // 选择器数据(库存/登录态都会变,缓存重放等于把陈旧列表推给下一个会话)。
+          // 真实接入把下面这行换成"去你自己的后端取当前该展示的商品"。
+          DevCapabilityActions.ACTION_PRODUCT -> {
+            HecongChat.setPickerData("product", DemoSampleData.products())
+            HecongChat.openPicker("product")
+          }
+          DevCapabilityActions.ACTION_ORDER -> {
+            HecongChat.setPickerData("order", DemoSampleData.orders())
+            HecongChat.openPicker("order")
+          }
+          // 两个位置对比那两个按钮:只弹提示,说明"点了会回到你的代码里"
+          else -> MainActivity.toastFromAnywhere("你点了自定义按钮「$id」—— 这里是你的代码")
+        }
+      }
+
+      /**
+       * ④ **聊天页里任何"要往外跳"的动作都先经过这里** —— 客服发的网址、商品卡片的详情链接、
+       * 电话号码、邮箱、页面内的跳转,统统先问你一次。
+       *
+       * 返回 `true` = 你自己处理了(SDK 什么都不做);返回 `false`/不实现 = SDK 用默认方式
+       * (网址跳系统浏览器、电话跳拨号、邮箱跳邮件)。
+       *
+       * 下面这段是**分流范例**:自家商品链接 → 跳自己 APP 的原生页面;其余 → 交给系统。
+       */
+      override fun onOpenUrl(url: String): Boolean {
+        val prefix = DemoSampleData.DEMO_SITE + "/product/"
+        if (url.startsWith(prefix)) {
+          val productId = url.removePrefix(prefix)
+          // 真实接入这里换成你自己的路由跳转,例如 startActivity(ProductDetailActivity…)
+          MainActivity.toastFromAnywhere("拦截成功 → 这里跳你 APP 的商品详情页(商品 $productId)")
+          return true // 我处理了,SDK 别再管
+        }
+        return false // 其余交给 SDK 默认处理(网址跳系统浏览器)
+      }
+
+      // ⑤ 未登录访客的离线推送靠这个号对上人
       override fun onAnonymousIdChanged(anonymousId: String) {
         lastAnonymousId = anonymousId
         // 真实接入在这里:postToMyBackend(anonymousId, myPushToken)
       }
 
-      // ④ **会话事件通吃入口 —— 优先接这个**。
+      // ⑥ **会话事件通吃入口 —— 优先接这个**。
       //
       // 事件名与网页版 `hc.on(name, ...)` 完全同名(消息到达 / 对话起止 / 网络通断)。
       // 好处:我们以后在 H5 侧新增的事件,**你不用升级 SDK 就能收到** —— 而具名回调
-      // (下面 ⑤)每加一个都要等你升级依赖 + 重新发版,APP 的升级链条比网页长得多。
+      // (下面 ⑦)每加一个都要等你升级依赖 + 重新发版,APP 的升级链条比网页长得多。
       override fun onEvent(name: String, payload: JSONObject?) {
         DemoEventLog.record(name, payload) // 演示:记进流水,诊断页能看见
         // 真实接入按 name 分流做事,例如:
@@ -56,7 +98,7 @@ class DemoApp : Application() {
         //   "network:offline"    -> 自己页面上显示"连接中断"
       }
 
-      // ⑤ 具名回调(便利糖:有类型、不用解 JSON)。**跟 ④ 二选一,别同一件事处理两遍** ——
+      // ⑦ 具名回调(便利糖:有类型、不用解 JSON)。**跟 ⑥ 二选一,别同一件事处理两遍** ——
       // 这里刻意分工:④ 只记流水给你看,⑤ 演示真正的业务动作。
       override fun onIncomingMessage(message: HecongMessage) {
         // 只有"对方"的消息会到这里(自己发的不会),所以适合做提醒。

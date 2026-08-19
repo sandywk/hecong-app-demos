@@ -26,6 +26,7 @@ private class Group(val title: String, val scenes: List<Scene>)
 /** 「示例」页(无状态,构建一次即可) */
 fun buildCatalogPage(activity: MainActivity): View = with(activity) {
   val actions = CatalogActions(activity)
+  val dev = DevCapabilityActions(activity)
 
   fun openChat(vararg extras: Pair<String, Any>) {
     if (!ChannelSetup.ensureReady(activity)) return
@@ -86,6 +87,26 @@ fun buildCatalogPage(activity: MainActivity): View = with(activity) {
       Scene("文件下载与外链", "文件走系统下载,外部链接跳系统浏览器") { openChat() },
       Scene("会话事件流水", "看 SDK 发了哪些事件:消息到达 / 对话起止 / 网络通断") {
         actions.showEventLog()
+      },
+    )),
+    Group("开发者能力(工作台配不出来,要写代码)", listOf(
+      Scene("指定技能组 · 打开时", "填组名 → 用它打开客服;老版本 SDK 也认(走地址参数)") {
+        dev.openWithSkillGroup()
+      },
+      Scene("指定技能组 · 聊天中切换", "聊到一半转专业组;留空可清除。新对话生效") {
+        dev.switchSkillGroup()
+      },
+      Scene("商品选择器", "附件面板加「商品」入口 → 点了弹商品列表(数据是你自己系统的)") {
+        dev.demoProductPicker()
+      },
+      Scene("订单选择器", "输入框正上方加「订单」入口 → 售后咨询直接选哪一单") {
+        dev.demoOrderPicker()
+      },
+      Scene("自定义按钮 · 两个位置对比", "附件面板(收着) vs 快捷区(显眼),一眼看出差别") {
+        dev.demoBothSlots()
+      },
+      Scene("撤掉自定义按钮", "演示 unregister;同名再注册 = 覆盖,不会重复") {
+        dev.clearActions()
       },
     )),
     Group("配置与诊断", listOf(

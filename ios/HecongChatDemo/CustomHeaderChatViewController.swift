@@ -28,6 +28,10 @@ final class CustomHeaderChatViewController: UIViewController, HecongChatDelegate
     // ① hh=1:标题栏我自己画,聊天页别再画一条
     chat = HecongChatViewController(config: DemoConfig.buildChatConfig(extraQuery: ["hh": "1"]))
     super.init(nibName: nil, bundle: nil)
+    // ② 聊天是沉浸页:推入时收起宿主的底部 Tab。
+    // **设在这里而不是调用处** —— 有两处 push 本页(示例列表 / 冷启恢复),
+    // 靠调用方各自记得设,漏一处就是"聊天页底下压着一条 Tab 栏"(2026-08-19 真机实测到)。
+    hidesBottomBarWhenPushed = true
   }
 
   @available(*, unavailable)

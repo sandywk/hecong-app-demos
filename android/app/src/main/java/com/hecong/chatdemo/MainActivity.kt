@@ -41,6 +41,15 @@ class MainActivity : AppCompatActivity() {
         ).show()
       }
     }
+
+    /** 演示用:从任意处弹一句提示(自定义按钮点击回调用) */
+    @JvmStatic
+    fun toastFromAnywhere(text: String) {
+      val activity = live?.get() ?: return
+      activity.runOnUiThread {
+        android.widget.Toast.makeText(activity, text, android.widget.Toast.LENGTH_LONG).show()
+      }
+    }
   }
 
   private var minePage: MinePage? = null
