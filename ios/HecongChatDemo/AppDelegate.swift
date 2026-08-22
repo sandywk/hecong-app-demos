@@ -1,4 +1,4 @@
-// 示范 App 入口:双 Tab ——「我的」(模拟你自家的页面)+「示例」(能力清单)。
+// 示范 App 入口:四个能力页(装配见 DemoTabBarController)。
 // 经典 AppDelegate 生命周期,无 storyboard,纯系统控件(零第三方 UI 依赖,与 SDK 同调性)。
 import HecongChatSDK
 import UIKit
@@ -15,55 +15,122 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     // 合规:configure 只登记参数、零联网零读存储,所以放启动里没问题;真正联网的是聊天页
     // load 与 startUnreadTracking,那两个要等用户同意隐私政策。
     HecongChat.shared.configure(DemoConfig.buildChatConfig(), listener: DemoFacadeDelegate.shared)
-    // ⚠️ 未读跟踪**默认关闭**,这里刻意不开 —— 让你看清"不开 = 完全不活动"的默认状态,
-    // 由「示例 → 客服能力 → 退出客服页也收未读」手动开启。
+    // ⚠️ 未读跟踪**默认关闭**,SDK 不会自己开。真实接入:按你自己 App 里"消息提醒"开关的
+    // 持久化状态决定要不要在启动时开启 —— 下面这行就是这个姿势(示范开关在「身份与会员 → 未读跟踪」)。
+    DemoFacadeDelegate.shared.restoreUnreadTrackingIfWanted()
 
     DemoStyle.installGlobalAppearance()
 
-    let mine = UINavigationController(rootViewController: MineViewController())
-    mine.tabBarItem = UITabBarItem(
-      title: "我的", image: DemoIcon.image(DemoIcon.mine, size: 20), tag: 0)
-    let catalog = UINavigationController(rootViewController: CatalogViewController())
-    catalog.tabBarItem = UITabBarItem(
-      title: "示例", image: DemoIcon.image(DemoIcon.catalog, size: 20), tag: 1)
-
-    let tabs = UITabBarController()
-    tabs.viewControllers = [mine, catalog]
+    // 四个能力页,详 DemoTabBarController 头注释。
+    let root = DemoTabBarController()
 
     let window = UIWindow(frame: UIScreen.main.bounds)
-    window.rootViewController = tabs
+    window.rootViewController = root
     window.makeKeyAndVisible()
     self.window = window
+
     // App 自身的深浅色(用户上次的选择);聊天页会跟着它走,详 DemoTheme
     DemoTheme.apply(to: window)
 
-    applyAutomationHooks(tabs: tabs, catalog: catalog)
+    applyAutomationHooks(root: root)
     return true
   }
 
-  /// 自动化测试钩子(simctl launch 传参驱动)——**演示工程自己用的,接入时不需要**
-  private func applyAutomationHooks(tabs: UITabBarController, catalog: UINavigationController) {
+  /// 验收用:`-hcUser <id>` 指定本次要绑的会员,缺省用演示台里那份。
+  /// 参数化才测得了"A 退出 → 登录 B"这类换人场景。
+  static func automationUserId() -> String {
+    let args = ProcessInfo.processInfo.arguments
+    if let i = args.firstIndex(of: "-hcUser"), i + 1 < args.count, !args[i + 1].isEmpty {
+      return args[i + 1]
+    }
+    return DemoMemberProfile.userId
+  }
+
+  /// 自动化测试钩子(simctl launch 传参驱动)——**演示工程自己用的,接入时不需要**。
+  ///
+  /// 命令行能启动模拟器却无法点击界面,没有这套钩子就无法自动验收各承载形态。
+  /// 分类改造后钩子名保持不变(旧脚本继续可用),只是各自先切到所属 Tab 再执行。
+  private func applyAutomationHooks(root: DemoTabBarController) {
     let args = ProcessInfo.processInfo.arguments
     let known = [
       "-autoOpenChat", "-autoIdentify", "-autoH5Header", "-autoDiagnostics", "-autoCustomHeader",
-      "-autoCatalog",
+      "-autoCatalog", "-autoStandard", "-autoSheet", "-autoSheetH5", "-autoImmersive",
+      "-autoTab", "-autoMemberProfile", "-autoResetUser", "-autoDumpState", "-autoUnreadOn", "-autoUnreadOff", "-autoIdentifyOnly", "-autoResetInChat",
     ]
     guard args.contains(where: known.contains) else { return }
-    tabs.selectedIndex = 1
     DispatchQueue.main.async {
-      let list = catalog.viewControllers.first as? CatalogViewController
       if args.contains("-autoCatalog") {
-        return // 只切到「示例」Tab,不再往下推页面
+        root.select(.appearance) // 只停在首页,不再往下推页面
+        return
       }
-      if args.contains("-autoDiagnostics") {
-        list?.navigationController?.pushViewController(DiagnosticsViewController(), animated: false)
+      // 直达某个能力页(-autoTab 0…3)—— 用于逐页截图验收
+      if let idx = args.firstIndex(of: "-autoTab"), idx + 1 < args.count,
+        let tab = Int(args[idx + 1]).flatMap(DemoTab.init(rawValue:))
+      {
+        root.select(tab)
+        return
+      }
+      // 四档承载形态统一在「界面形态」页发起
+      for (flag, mode) in [
+        ("-autoStandard", "standard"), ("-autoSheetH5", "sheetH5"),
+        ("-autoSheet", "sheet"), ("-autoImmersive", "immersive"),
+      ] where args.contains(flag) {
+        guard let nav = root.select(.appearance), let host = nav.topViewController else { return }
+        ChatLaunch.openArchetype(mode, from: host)
+        return
+      }
+      if args.contains("-autoUnreadOn") {
+        HecongChat.shared.startUnreadTracking(listener: DemoFacadeDelegate.shared); return
+      }
+      if args.contains("-autoUnreadOff") { HecongChat.shared.stopUnreadTracking(); return }
+      if args.contains("-autoDumpState") {
+        // 状态读出(验收用):把壳侧持久化的三个值打进系统日志。
+        // 用日志而不是读 plist —— 模拟器的 preferences 守护进程有缓存回写,
+        // 隔进程读盘会拿到过期快照(2026-08-21 实测踩到,一度误判为"号变回去了")。
+        NSLog(
+          "HCSTATE anonId=\(UserDefaults.standard.string(forKey: "hecong.chat.anonymousId") ?? "无")"
+            + " pendingReset=\(UserDefaults.standard.bool(forKey: "hecong.chat.pendingIdentityReset"))"
+            + " unreadWanted=\(UserDefaults.standard.bool(forKey: "hecong.chat.unreadTrackingWanted"))"
+            + " unread=\(HecongChat.shared.unreadCount)")
+        return
+      }
+      if args.contains("-autoIdentifyOnly") {
+        // 只绑身份、**不打开聊天页** —— 租户"登录成功回调里调 identify"的真实形态
+        HecongChat.shared.identify(
+          userId: Self.automationUserId(), profile: DemoMemberProfile.profileDictionary(),
+          data: DemoMemberProfile.dataDictionary())
+        root.select(.identity)
+        return
+      }
+      if args.contains("-autoResetInChat") {
+        // 聊天页**开着**的时候退出 —— 与 -autoResetUser(设置页形态)互为另一半
+        guard let nav = root.select(.identity), let host = nav.topViewController else { return }
+        ChatLaunch.push(from: host, title: "在线客服", userId: Self.automationUserId())
+        DispatchQueue.main.asyncAfter(deadline: .now() + 7) { HecongChat.shared.resetUser() }
+        return
+      }
+      if args.contains("-autoResetUser") {
+        // 退出登录:**不打开聊天页**,模拟租户在自己的设置页点退出(这正是它唯一的真实调用时机)
+        HecongChat.shared.resetUser()
+        root.select(.identity)
+        return
+      }
+      if args.contains("-autoMemberProfile") {
+        root.select(.identity)?.pushViewController(MemberProfileViewController(), animated: false)
+      } else if args.contains("-autoDiagnostics") {
+        root.select(.toolbox)?.pushViewController(DiagnosticsViewController(), animated: false)
       } else if args.contains("-autoCustomHeader") {
-        list?.navigationController?.pushViewController(CustomHeaderChatViewController(), animated: false)
+        root.select(.appearance)?
+          .pushViewController(CustomHeaderChatViewController(), animated: false)
       } else if args.contains("-autoH5Header") {
-        list?.pushChat(extraQuery: ["hh": "0"], hideNavBar: true)
+        guard let nav = root.select(.appearance), let host = nav.topViewController else { return }
+        ChatLaunch.push(from: host, extraQuery: ["hh": "0"], hideNavBar: true)
       } else {
-        list?.pushChat(
-          title: "在线客服", userId: args.contains("-autoIdentify") ? DemoConfig.demoUserId : nil)
+        let tab: DemoTab = args.contains("-autoIdentify") ? .identity : .appearance
+        guard let nav = root.select(tab), let host = nav.topViewController else { return }
+        ChatLaunch.push(
+          from: host, title: "在线客服",
+          userId: args.contains("-autoIdentify") ? Self.automationUserId() : nil)
       }
     }
   }
@@ -74,13 +141,35 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 final class DemoFacadeDelegate: NSObject, HecongChatDelegate {
   static let shared = DemoFacadeDelegate()
 
-  /// 最近一次生效的访客标识(演示用;真实接入应存到**你自己的后端**,与推送 token 绑一起 ——
-  /// 没登录的访客,离线推送就靠这个号对上人)。
-  private(set) var lastAnonymousId: String?
+  private let unreadWantedKey = "hecong.demo.unreadTrackingOn"
+
+  /// 示范开关的状态(持久化)—— 模拟宿主 App 自己的"消息提醒"设置项
+  var isUnreadTrackingOn: Bool { UserDefaults.standard.bool(forKey: unreadWantedKey) }
+
+  /// 拨动示范开关:开 = startUnreadTracking(可在聊天页打开之前调,从没聊过天时零请求),
+  /// 关 = stopUnreadTracking。
+  func setUnreadTracking(_ on: Bool) {
+    UserDefaults.standard.set(on, forKey: unreadWantedKey)
+    if on {
+      HecongChat.shared.startUnreadTracking(listener: self)
+      DemoStyle.toast("已开启未读跟踪 —— 进入客服留言后退出,等客服回复")
+    } else {
+      HecongChat.shared.stopUnreadTracking()
+      DemoStyle.toast("已停止未读跟踪")
+    }
+  }
+
+  /// App 启动时按上次的选择恢复(真实接入:读你自己的设置项)
+  func restoreUnreadTrackingIfWanted() {
+    if isUnreadTrackingOn { HecongChat.shared.startUnreadTracking(listener: self) }
+  }
 
   func hecongChatUnreadDidChange(_ count: Int) {
-    // 真实接入:更新 Tab 角标 / 入口红点
+    // 真实接入:更新你自己的角标 / 入口红点。这里同时演示三处落点 ——
+    // App 图标角标、底部 Tab 徽标、「身份与会员」页客服入口示范行的红点。
     UIApplication.shared.applicationIconBadgeNumber = count
+    DemoTabBarController.live?.applyUnread(count)
+    // 不弹提示:角标本身就是反馈(owner 2026-08-21),飘字只会盖住内容
   }
 
   /// **自定义按钮被点了** —— 这就是"点商品入口 → 弹商品列表"的接线处。
@@ -98,7 +187,6 @@ final class DemoFacadeDelegate: NSObject, HecongChatDelegate {
       HecongChat.shared.setPickerData("order", items: DemoSampleData.orders())
       HecongChat.shared.openPicker("order")
     default:
-      // 两个位置对比那两个按钮:只提示,说明"点了会回到你的代码里"
       DemoStyle.toast("你点了自定义按钮「\(id)」—— 这里是你的代码")
     }
   }
@@ -121,10 +209,10 @@ final class DemoFacadeDelegate: NSObject, HecongChatDelegate {
     return false // 其余交给 SDK 默认处理(网址跳 Safari)
   }
 
-  func hecongChatDidChangeAnonymousId(_ anonymousId: String) {
-    lastAnonymousId = anonymousId
-    // 真实接入在这里:postToMyBackend(anonymousId, myPushToken)
-  }
+  /// 访客标识变化 —— **离线推送的接线点**:没登录的访客,推送就靠这个号对上人。
+  /// 真实接入在这里:postToMyBackend(anonymousId, myPushToken)。
+  /// 示范 App 做不了推送,所以这里不做任何事,接法详见接入文档「离线推送」。
+  func hecongChatDidChangeAnonymousId(_ anonymousId: String) {}
 
   // MARK: - 会话事件
 

@@ -58,19 +58,21 @@ enum DemoStyle {
     if #available(iOS 14.0, *) { chat.navigationItem.backButtonDisplayMode = .minimal }
   }
 
+  /// 当前主窗口。iOS 13 基线:不能用 iOS 15 才有的 `UIWindowScene.keyWindow`
+  /// (SDK 最低支持 13,示范工程跟同一条基线走 —— 否则示范代码本身就编不过老 deployment target)
+  static func keyWindow() -> UIWindow? {
+    UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .flatMap { $0.windows }
+      .first { $0.isKeyWindow }
+  }
+
   /// 顶部飘一条轻提示(**演示用**:真实接入请换成你自己的本地通知)。
   ///
   /// 用在"收到客服消息"上 —— 用户可能正在 App 的别的页面,不提醒的话他要等下次
   /// 点进客服才知道有回复。信号源是 `hecongChat(didReceiveIncomingMessage:)`。
   static func toast(_ message: String) {
-    // iOS 13 基线:不能用 iOS 15 才有的 UIWindowScene.keyWindow(SDK 最低支持 13,
-    // 示范工程跟同一条基线走 —— 否则示范代码本身就编不过老 deployment target)
-    guard
-      let window = UIApplication.shared.connectedScenes
-        .compactMap({ $0 as? UIWindowScene })
-        .flatMap({ $0.windows })
-        .first(where: { $0.isKeyWindow })
-    else { return }
+    guard let window = keyWindow() else { return }
 
     let label = PaddedLabel()
     label.text = message

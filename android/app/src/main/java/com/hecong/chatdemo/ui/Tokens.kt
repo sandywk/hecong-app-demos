@@ -90,7 +90,11 @@ fun Context.bodyMd(s: String, @ColorRes color: Int = R.color.ink) =
 fun Context.caption(s: String, @ColorRes color: Int = R.color.ink2) =
   text(12f, "sans-serif", color, false).apply { text = s }
 
-/** 分组标签 11/600(字距略放,Linear 风) */
+/** 分组标题 13/500(列表页每组上方的小标题,与卡片左缘齐平 —— 与 iOS 侧同规格) */
+fun Context.groupTitle(s: String) =
+  text(13f, "sans-serif-medium", R.color.ink2, false).apply { text = s }
+
+/** 分组标签 11/600(字距略放,Linear 风;底部 Tab 文字用) */
 fun Context.groupLabel(s: String) =
   text(11f, "sans-serif-medium", R.color.ink3, false).apply {
     text = s

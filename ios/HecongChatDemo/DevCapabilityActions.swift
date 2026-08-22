@@ -21,17 +21,17 @@ enum DevCapabilityActions {
   ///
   /// 接入时你要抄的就是这两行:`config.routing = HecongRouting(skillGroup:)` 然后照常打开。
   /// 值会拼进聊天页地址,**老版本 SDK 的壳也认**(纯 URL,不依赖新命令)。
-  static func openWithSkillGroup(on vc: CatalogViewController) {
-    askSkillGroup(on: vc, title: "打开客服并指定技能组", hint: "填你工作台里的技能组名称") { group in
+  static func openWithSkillGroup(on host: UIViewController) {
+    askSkillGroup(on: host, title: "打开客服并指定技能组", hint: "填你工作台里的技能组名称") { group in
       // 接入时就这一行:config.routing = HecongRouting(skillGroup: 组名)
-      vc.pushChat(title: "在线客服", routing: HecongRouting(skillGroup: group))
+      ChatLaunch.push(from: host, title: "在线客服", routing: HecongRouting(skillGroup: group))
     }
   }
 
   /// **聊天页开着时换组**(运行时档)。留空 = 清除指派。
   /// ⚠️ 指派在**新对话创建时**生效 —— 已经在进行中的对话不会被中途改派。
-  static func switchSkillGroup(on vc: CatalogViewController) {
-    askSkillGroup(on: vc, title: "切换技能组", hint: "留空 = 清除指派,回到默认分派") { group in
+  static func switchSkillGroup(on host: UIViewController) {
+    askSkillGroup(on: host, title: "切换技能组", hint: "留空 = 清除指派,回到默认分派") { group in
       if group.isEmpty {
         HecongChat.shared.setRouting(nil as String?)
         DemoStyle.toast("已清除技能组指派")
@@ -48,30 +48,22 @@ enum DevCapabilityActions {
   ///      回填你系统里的当前商品,再 `openPicker` 打开。
   ///
   /// ⚠️ 第 2 步的数据**必须在点击那一刻给**,不能提前:SDK 刻意不缓存选择器数据。
-  static func demoProductPicker(on vc: CatalogViewController) {
+  static func demoProductPicker(on host: UIViewController) {
     HecongChat.shared.registerAction(id: actionProduct, label: "商品", icon: nil, slot: "attach")
-    vc.pushChat()
+    ChatLaunch.push(from: host)
     DemoStyle.toast("已加「商品」入口 —— 点输入框旁的 + 号就能看到")
   }
 
   /// **订单选择器**:同商品,换个数据源、换个位置(快捷区更显眼)。
-  static func demoOrderPicker(on vc: CatalogViewController) {
+  static func demoOrderPicker(on host: UIViewController) {
     HecongChat.shared.registerAction(id: actionOrder, label: "订单", icon: nil, slot: "quick")
-    vc.pushChat()
+    ChatLaunch.push(from: host)
     DemoStyle.toast("已加「订单」入口 —— 在输入框正上方")
-  }
-
-  /// **两个位置对比**:附件面板(收着) vs 快捷区(显眼)。
-  static func demoBothSlots(on vc: CatalogViewController) {
-    HecongChat.shared.registerAction(id: "demo-attach", label: "我在附件面板", icon: nil, slot: "attach")
-    HecongChat.shared.registerAction(id: "demo-quick", label: "我在快捷区", icon: nil, slot: "quick")
-    vc.pushChat()
-    DemoStyle.toast("两个位置各放了一个按钮,进去对比看")
   }
 
   /// 撤掉本页注册过的所有自定义按钮(同 id 再注册 = 覆盖,不会重复)
   static func clearActions() {
-    for id in [actionProduct, actionOrder, "demo-attach", "demo-quick"] {
+    for id in [actionProduct, actionOrder] {
       HecongChat.shared.unregisterAction(id)
     }
     DemoStyle.toast("已撤掉所有自定义按钮")

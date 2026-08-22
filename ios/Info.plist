@@ -12,6 +12,9 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>Hecong Chat Demo</string>
+	<!-- 桌面显示名(owner 2026-08-21 定):国内 SDK 厂商惯例「品牌 + Demo」,一眼知道是非正式示范 -->
+	<key>CFBundleDisplayName</key>
+	<string>合从 Demo</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

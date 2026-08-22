@@ -1,6 +1,5 @@
 // 诊断页(示范工程自己的脚手架,接入时不需要):当前配置 / 渠道 / 访客标识 —— 排查问题先看这页。
 import Foundation
-import Security
 import UIKit
 
 final class DiagnosticsViewController: UITableViewController {
@@ -21,23 +20,13 @@ final class DiagnosticsViewController: UITableViewController {
     ]
   }
 
-  /// 读 SDK 存在钥匙串里的访客标识(service/account 与 SDK 内部一致)。
+  /// 读 SDK 持久化的访客标识镜像(key 与 SDK 内部一致)。
   /// 仅诊断演示用 —— 接入时不需要读它,SDK 自动管理。
+  ///
+  /// 2026-08-21 起 SDK 只用 UserDefaults(原钥匙串层已砍,理由见 SDK 的
+  /// `HecongAnonymousIdStore` 头注释:卸载重装本就该是新访客,且安卓做不到同款)。
   private func readMirrorAnonymousId() -> String? {
-    let query: [String: Any] = [
-      kSecClass as String: kSecClassGenericPassword,
-      kSecAttrService as String: "com.hecong.chat-sdk",
-      kSecAttrAccount as String: "anonymousId",
-      kSecReturnData as String: true,
-      kSecMatchLimit as String: kSecMatchLimitOne,
-    ]
-    var result: AnyObject?
-    if SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
-      let data = result as? Data, let value = String(data: data, encoding: .utf8) {
-      return value
-    }
-    // 壳的 UserDefaults 降级层(Keychain 受限环境,如无签名模拟器构建)
-    return UserDefaults.standard.string(forKey: "hecong.chat.anonymousId")
+    UserDefaults.standard.string(forKey: "hecong.chat.anonymousId")
   }
 
   private func appVariantLabel() -> String {

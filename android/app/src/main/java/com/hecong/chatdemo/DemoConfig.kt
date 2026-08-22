@@ -1,7 +1,7 @@
 // 渠道三档配置(一处生效,零密钥零敏感值)。
 //
 // 装载形态 2026-08-17 改版后,接入 = **渠道 ID 一个值**(SDK 自带骨架页 + 静态域加载,
-// 零域名):local 档额外把加载地址指到本地(5177),demo/custom 档走 SDK 默认线上地址。
+// 零域名):local 档额外把加载地址指到本地(5175),demo/custom 档走 SDK 默认线上地址。
 //
 // | 档 | 谁用 | 说明 |
 // |---|---|---|
@@ -20,8 +20,9 @@ object DemoConfig {
   private const val PREFS = "hecong_demo_app"
   private const val KEY_CUSTOM_CHANNEL = "customChannelId"
 
-  // TODO(owner 建好官方演示渠道后填)
-  private const val DEMO_CHANNEL_ID = "TODO_OFFICIAL_DEMO_CHANNEL_ID"
+  // 官方演示渠道(owner 2026-08-22 提供)—— **发布版默认走这一档**,租户扫码装完点开即可试用。
+  // 以后换渠道只改这一行(iOS 侧 `DemoConfig.swift` 同款一行,两端要一起换)。
+  private const val DEMO_CHANNEL_ID = "01a02733-32ca-723e-9826-e2417506387c"
 
   enum class Profile { LOCAL, DEMO, CUSTOM }
 
@@ -57,6 +58,9 @@ object DemoConfig {
     // 深浅色**一行都不用写**:SDK 默认就跟随你 APP 当前的深浅色(config.colorScheme = "host")。
     // 想强制某一档、或让渠道后台说了算,才需要显式设 colorScheme —— 详 DemoTheme。
     config.extraQuery.putAll(extraQuery)
+    // 演示缩短到下限 30 秒,让「工作台回复 → 入口徽标亮起」更快看到;真实接入保持默认 60 即可。
+    // 下限由 SDK 强制(低于 30 会被抬到 30),不必担心租户配出高频请求。
+    config.unreadPollIntervalSeconds = 30
     return config
   }
 
@@ -70,7 +74,5 @@ object DemoConfig {
     Profile.DEMO -> "官方演示渠道"
   }
 
-  /** 演示用会员身份(真实接入 = 你自己登录体系里的用户;ID 要"不可猜",详接入文档) */
-  const val DEMO_USER_ID = "demo-user-8f3a2c"
-  const val DEMO_USER_NAME = "演示会员"
+  /** 演示用会员身份已迁至 [DemoMemberProfile](可在「身份与会员 → 示范会员资料」中填写并持久化) */
 }

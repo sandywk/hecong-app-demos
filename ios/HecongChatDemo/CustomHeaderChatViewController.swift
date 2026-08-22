@@ -19,7 +19,6 @@ import UIKit
 final class CustomHeaderChatViewController: UIViewController, HecongChatDelegate {
   private let chat: HecongChatViewController
   private let avatarView = UIImageView()
-  private let avatarLabel = UILabel()
   private let nameLabel = UILabel()
   private let signLabel = UILabel()
   private var pendingAvatarUrl: String?
@@ -81,11 +80,7 @@ final class CustomHeaderChatViewController: UIViewController, HecongChatDelegate
     avatarView.contentMode = .scaleAspectFill
     avatarView.layer.cornerRadius = size / 2
     avatarView.clipsToBounds = true
-    avatarView.backgroundColor = DemoColor.accent
-    avatarLabel.textAlignment = .center
-    avatarLabel.textColor = .white
-    avatarLabel.font = .systemFont(ofSize: 13, weight: .medium)
-    avatarView.addSubview(avatarLabel)
+    avatarView.backgroundColor = DemoColor.skeleton // 初值即骨架色(有图时被真图覆盖)
 
     nameLabel.font = .systemFont(ofSize: 15, weight: .semibold)
     nameLabel.textColor = DemoColor.ink
@@ -103,7 +98,6 @@ final class CustomHeaderChatViewController: UIViewController, HecongChatDelegate
     bar.addSubview(row)
 
     row.translatesAutoresizingMaskIntoConstraints = false
-    avatarLabel.translatesAutoresizingMaskIntoConstraints = false
     NSLayoutConstraint.activate([
       row.leadingAnchor.constraint(equalTo: bar.leadingAnchor, constant: 14),
       row.trailingAnchor.constraint(lessThanOrEqualTo: bar.trailingAnchor, constant: -14),
@@ -111,8 +105,6 @@ final class CustomHeaderChatViewController: UIViewController, HecongChatDelegate
       back.widthAnchor.constraint(equalToConstant: 26),
       avatarView.widthAnchor.constraint(equalToConstant: size),
       avatarView.heightAnchor.constraint(equalToConstant: size),
-      avatarLabel.centerXAnchor.constraint(equalTo: avatarView.centerXAnchor),
-      avatarLabel.centerYAnchor.constraint(equalTo: avatarView.centerYAnchor),
     ])
     return bar
   }
@@ -140,27 +132,42 @@ final class CustomHeaderChatViewController: UIViewController, HecongChatDelegate
     renderAvatar(pending: pending, url: identity.avatar, initial: identity.nickname?.prefix(1))
   }
 
-  /// 有图就真加载图,加载中/失败退回文字首字 —— 真实接入换成 SDWebImage / Kingfisher
+  /// 有图就真加载图 —— 真实接入换成 SDWebImage / Kingfisher。
+  ///
+  /// 🔴 **两条走查纪律(2026-08-20 owner,两端同款)**:
+  /// ① **有头像时:灰骨架 → 真头像,中间不插别的东西**。原先「灰骨架 → 彩底首字 → 真头像」,
+  ///    那个彩色圆只活几十到几百毫秒,看着就是**闪了一下**,很突兀 ——
+  ///    占位的意义是"安静地占住位置",不是"先给个别的";
+  /// ② **确实没有头像(没配 / 加载失败)→ 整个头像不画**,而不是退成彩底首字 ——
+  ///    彩色圆本身就难看,而且那是**我们替租户编了一个不存在的东西**。
+  ///    不画时文字直接紧挨返回键,与 SDK 标题栏"空字段整行让位"同一条规矩。
   private func renderAvatar(pending: Bool, url: String?, initial: Substring?) {
+    _ = initial // 不再用首字兜底(见上 ②)
+    let showSkeleton = {
+      self.avatarView.isHidden = false
+      self.avatarView.image = nil
+      self.avatarView.backgroundColor = DemoColor.skeleton
+    }
     if pending {
-      avatarView.image = nil
-      avatarView.backgroundColor = DemoColor.skeleton
-      avatarLabel.text = nil
+      showSkeleton()
       pendingAvatarUrl = nil
       return
     }
-    avatarView.image = nil
-    avatarView.backgroundColor = DemoColor.accent
-    avatarLabel.text = initial.map(String.init) ?? "客"
     guard let url = url, !url.isEmpty else {
+      avatarView.isHidden = true // 没头像:不画,不编
       pendingAvatarUrl = nil
       return
     }
+    showSkeleton() // 有头像:安静占位,等真图
     pendingAvatarUrl = url
     AvatarLoader.load(url, token: { [weak self] in self?.pendingAvatarUrl }) { [weak self] image in
-      guard let self = self, let image = image else { return } // 失败保留文字首字兜底
+      guard let self = self else { return }
+      guard let image = image else {
+        self.avatarView.isHidden = true // 加载失败也不画
+        return
+      }
       self.avatarView.image = image
-      self.avatarLabel.text = nil
+      self.avatarView.backgroundColor = .clear
     }
   }
 }

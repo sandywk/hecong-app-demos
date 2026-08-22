@@ -130,55 +130,82 @@ final class DemoBadgeView: UIView {
   required init?(coder: NSCoder) { fatalError() }
 }
 
-/// 个人中心顶部的头像卡(演示用的假资料,接入时不需要)
-final class DemoProfileCell: UITableViewCell {
-  static let reuseId = "DemoProfileCell"
+/// 演示台的输入行:单行文本框 / 多行文本域。**示范工程自己的脚手架**,接入时不需要。
+final class DemoFieldCell: UITableViewCell, UITextFieldDelegate, UITextViewDelegate {
+  static let reuseId = "DemoFieldCell"
+
+  private let field = UITextField()
+  private let area = UITextView()
+  private var fieldConstraints: [NSLayoutConstraint] = []
+  private var areaConstraints: [NSLayoutConstraint] = []
+  private var onChange: ((String) -> Void)?
 
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     backgroundColor = DemoColor.surface
-
-    let avatar = UILabel()
-    avatar.text = "演"
-    avatar.textAlignment = .center
-    avatar.textColor = .white
-    avatar.font = .systemFont(ofSize: 17, weight: .medium)
-    avatar.backgroundColor = DemoColor.accent
-    avatar.layer.cornerRadius = 26
-    avatar.clipsToBounds = true
-
-    let name = UILabel()
-    name.text = DemoConfig.demoUserName
-    name.font = DemoFont.title
-    name.textColor = DemoColor.ink
-    let memberId = UILabel()
-    memberId.text = "会员 ID · \(DemoConfig.demoUserId)"
-    memberId.font = DemoFont.caption
-    memberId.textColor = DemoColor.ink2
-
-    let texts = UIStackView(arrangedSubviews: [name, memberId])
-    texts.axis = .vertical
-    texts.spacing = 4
-
-    let row = UIStackView(arrangedSubviews: [avatar, texts])
-    row.axis = .horizontal
-    row.alignment = .center
-    row.spacing = 14
-    contentView.addSubview(row)
-
-    row.translatesAutoresizingMaskIntoConstraints = false
-    let pad = DemoMetric.cardPadding
-    NSLayoutConstraint.activate([
-      row.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: pad),
-      row.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -pad),
-      row.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
-      row.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
-      avatar.widthAnchor.constraint(equalToConstant: 52),
-      avatar.heightAnchor.constraint(equalToConstant: 52),
-    ])
     selectionStyle = .none
+
+    field.font = DemoFont.body
+    field.textColor = DemoColor.ink
+    field.delegate = self
+    field.autocorrectionType = .no
+    field.autocapitalizationType = .none
+    field.clearButtonMode = .whileEditing
+    field.addTarget(self, action: #selector(fieldChanged), for: .editingChanged)
+
+    area.font = DemoFont.body
+    area.textColor = DemoColor.ink
+    area.backgroundColor = .clear
+    area.delegate = self
+    area.autocorrectionType = .no
+    area.autocapitalizationType = .none
+    area.textContainerInset = .zero
+    area.textContainer.lineFragmentPadding = 0
+
+    // 🔴 两个输入件的约束**分组保存、按需激活**:隐藏的视图仍然参与 Auto Layout,
+    // 若两组同时激活,单行文本框那一行会被隐藏的多行文本域撑到三倍高(2026-08-20 实测)。
+    for (input, group) in [(field, 0), (area, 1)] as [(UIView, Int)] {
+      contentView.addSubview(input)
+      input.translatesAutoresizingMaskIntoConstraints = false
+      let pad = DemoMetric.cardPadding
+      var group_constraints = [
+        input.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: pad),
+        input.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -pad),
+        input.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+        input.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
+      ]
+      if group == 1 { group_constraints.append(input.heightAnchor.constraint(equalToConstant: 76)) }
+      if group == 0 { fieldConstraints = group_constraints } else { areaConstraints = group_constraints }
+    }
+    contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: DemoMetric.rowMinHeight)
+      .isActive = true
   }
 
   @available(*, unavailable)
   required init?(coder: NSCoder) { fatalError() }
+
+  func configure(
+    text: String, placeholder: String, multiline: Bool, onChange: @escaping (String) -> Void
+  ) {
+    self.onChange = onChange
+    field.isHidden = multiline
+    area.isHidden = !multiline
+    NSLayoutConstraint.deactivate(multiline ? fieldConstraints : areaConstraints)
+    NSLayoutConstraint.activate(multiline ? areaConstraints : fieldConstraints)
+    if multiline {
+      area.text = text
+    } else {
+      field.text = text
+      field.placeholder = placeholder
+    }
+  }
+
+  @objc private func fieldChanged() { onChange?(field.text ?? "") }
+
+  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    textField.resignFirstResponder()
+    return true
+  }
+
+  func textViewDidChange(_ textView: UITextView) { onChange?(textView.text ?? "") }
 }

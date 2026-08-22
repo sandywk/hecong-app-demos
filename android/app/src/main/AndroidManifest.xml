@@ -9,8 +9,8 @@
 
   <application
       android:name=".DemoApp"
-      android:label="Hecong Chat Demo"
-      android:icon="@drawable/ic_launcher"
+      android:label="合从 Demo"
+      android:icon="@mipmap/ic_launcher"
       android:theme="@style/Theme.Demo">
     <!-- 键盘标准(adjustResize)已由壳视图 attach 时**代码级焊死**(压过任何 manifest/全局
          配置,租户无需也不必声明)—— 本示范刻意不声明,以实证"租户全局键盘配置千奇百怪
@@ -21,10 +21,10 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
-    <activity android:name=".ChatActivity" android:exported="false" />
     <activity android:name=".DiagnosticsActivity" android:exported="false" />
-    <!-- 租户自绘标题栏示范(左原生返回 + 右头像昵称签名;桥协议 §四 header-identity) -->
+    <activity android:name=".MemberProfileActivity" android:exported="false"
+        android:windowSoftInputMode="adjustResize" />
+    <!-- 嵌入档示范:自家顶栏 + HecongChatFragment(三段系统回调由 SDK 内部消化;键盘由壳焊死 adjustResize,无需声明) -->
     <activity android:name=".CustomHeaderChatActivity" android:exported="false" />
-    <!-- 底部弹层用的是 Dialog,不需要单独声明 Activity -->
   </application>
 </manifest>

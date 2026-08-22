@@ -1,7 +1,7 @@
 // 渠道三档配置(一处生效,零密钥零敏感值)。
 //
 // 接入 = **渠道 ID 一个值**(SDK 自带骨架页 + 静态域加载,零域名):local 档额外把加载地址
-// 指到本地(5177),demo/custom 档走 SDK 默认线上地址。
+// 指到本地(5175),demo/custom 档走 SDK 默认线上地址。
 //
 // | 档 | 谁用 | 说明 |
 // |---|---|---|
@@ -16,14 +16,15 @@ import HecongChatSDK
 enum DemoConfig {
   private static let customKey = "hecong.demo.customChannelId"
 
-  // TODO(owner 建好官方演示渠道后填)
-  private static let demoChannelId = "TODO_OFFICIAL_DEMO_CHANNEL_ID"
+  // 官方演示渠道(owner 2026-08-22 提供)—— **发布版默认走这一档**,租户装完点开即可试用。
+  // 以后换渠道只改这一行(安卓侧 `DemoConfig.kt` 同款一行,两端要一起换)。
+  private static let demoChannelId = "01a02733-32ca-723e-9826-e2417506387c"
 
   #if DEBUG
-  // local 档(仅 DEBUG):内部联调渠道 + 本地插座(PORT=5177 pnpm demo:link + 后端 3024/17108;
+  // local 档(仅 DEBUG):内部联调渠道 + 本地插座(PORT=5175 pnpm demo:link + 后端 3024/17108;
   // iOS 模拟器与宿主 Mac 共享网络 localhost 直通)。发布构建这段代码不存在。
   private static let localChannelId: String? = "01a00edc-a820-71d1-bf6a-dd78a494ac79"
-  private static let localLoaderUrl: String? = "http://localhost:5177/hecong-link.js"
+  private static let localLoaderUrl: String? = "http://localhost:5175/hecong-link.js"
   #else
   private static let localChannelId: String? = nil
   private static let localLoaderUrl: String? = nil
@@ -63,6 +64,14 @@ enum DemoConfig {
     case .demo: config = HecongChatConfig(channelId: demoChannelId)
     }
     config.extraQuery = extraQuery
+    // 演示缩短到下限 30 秒,让「工作台回复 → 入口徽标亮起」更快看到;真实接入保持默认 60 即可。
+    // 下限由 SDK 强制(低于 30 会被抬到 30),不必担心租户配出高频请求。
+    config.unreadPollInterval = 30
+    // 验收用:`-hcBadLoader` 把插座地址指到没人监听的端口,模拟"装载失败"
+    // (验证「标记必须等 ready 才划掉」——页面没起来就划掉 = 这次登出永久丢失)
+    if ProcessInfo.processInfo.arguments.contains("-hcBadLoader") {
+      config.loaderUrl = "http://127.0.0.1:1/hecong-link.js"
+    }
     return config
   }
 
@@ -78,7 +87,6 @@ enum DemoConfig {
     }
   }
 
-  /// 演示用会员身份(真实接入 = 你自己登录体系里的用户;ID 要"不可猜",详接入文档)
-  static let demoUserId = "demo-user-8f3a2c"
-  static let demoUserName = "演示会员"
+  /// 演示用会员身份已迁至 [DemoMemberProfile](可在「身份与会员 → 示范会员资料」中填写并持久化)——
+  /// 写死一个假会员只能验证"没报错",验证不了"透传的内容对不对"。
 }

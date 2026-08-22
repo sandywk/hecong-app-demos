@@ -18,9 +18,18 @@ SRC = ROOT / 'apps/studio/node_modules/lucide-react/dist/esm/icons'
 OUT = Path(__file__).resolve().parents[1] / 'app/src/main/res/drawable'
 
 ICONS = [
-    'chevron-left', 'chevron-right', 'x', 'ellipsis',
-    'package', 'map-pin', 'settings', 'message-circle',
-    'layout-grid', 'list',
+    # 通用
+    'chevron-left', 'chevron-right',
+    # 底部 Tab(与 iOS SF Symbols 逐项对位:界面形态 / 身份与会员 / 高级扩展 / 配置与诊断)
+    'copy', 'circle-user', 'sliders-horizontal', 'wrench',
+    # 界面形态
+    'panel-bottom', 'square', 'layout-template', 'type', 'palette', 'contrast', 'moon', 'sun', 'globe', 'settings',
+    # 身份与会员
+    'user', 'log-in', 'log-out', 'square-pen', 'bell', 'message-circle',
+    # 高级扩展
+    'git-branch', 'shopping-bag', 'package', 'trash-2',
+    # 配置与诊断
+    'radio', 'info', 'scroll-text',
 ]
 
 

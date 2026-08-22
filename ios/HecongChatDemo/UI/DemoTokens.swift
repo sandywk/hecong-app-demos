@@ -51,8 +51,8 @@ enum DemoFont {
   static let title = UIFont.systemFont(ofSize: 17, weight: .semibold)
   /// 说明文 12
   static let caption = UIFont.systemFont(ofSize: 12)
-  /// 分组标签 11 / semibold
-  static let groupLabel = UIFont.systemFont(ofSize: 11, weight: .semibold)
+  /// 分组标题 13 / semibold(列表页每组上方的小标题)
+  static let groupTitle = UIFont.systemFont(ofSize: 13, weight: .semibold)
 }
 
 enum DemoIcon {
@@ -61,14 +61,39 @@ enum DemoIcon {
     UIImage(systemName: name, withConfiguration: UIImage.SymbolConfiguration(pointSize: size, weight: weight))
   }
 
+  // Tab 图标(iOS 13 起即有的符号,避免老系统取不到图)
+  static let tabIdentity = "person.crop.circle"
+  static let tabAppearance = "rectangle.on.rectangle"
+  static let tabAdvanced = "slider.horizontal.3"
+  static let tabToolbox = "wrench"
+
+  // 场景行图标
+  static let channel = "antenna.radiowaves.left.and.right"
+  static let member = "person.crop.circle"
+  static let visitor = "person"
+  static let login = "arrow.right.square"
+  static let logout = "arrow.backward.square"
+  static let edit = "square.and.pencil"
+  static let bell = "bell"
+  static let layout = "rectangle.on.rectangle"
+  static let sheet = "rectangle.bottomthird.inset.fill"
+  static let immersive = "rectangle.fill"
+  static let embed = "square.on.square"
+  static let text = "pencil"
+  static let palette = "paintbrush"
+  static let theme = "circle.lefthalf.fill"
+  static let dark = "moon"
+  static let light = "sun.max"
+  static let language = "globe"
+  static let route = "arrow.triangle.branch"
+  static let product = "bag"
+  static let trash = "trash"
+  static let info = "info.circle"
+  static let log = "list.bullet.rectangle"
+
   static let order = "shippingbox"
-  static let address = "mappin.and.ellipse"
   static let settings = "gearshape"
   static let support = "bubble.left"
-  static let mine = "square.grid.2x2"
-  static let catalog = "list.bullet"
   static let chevronRight = "chevron.right"
   static let chevronLeft = "chevron.left"
-  static let close = "xmark"
-  static let more = "ellipsis"
 }

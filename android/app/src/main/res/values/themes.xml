@@ -16,16 +16,4 @@
 
   <style name="Theme.Demo" parent="Base.Theme.Demo" />
 
-  <!-- 底部弹层:透明窗 + 自绘卡片(不引 material BottomSheet,零依赖是本 demo 的卖点) -->
-  <style name="Theme.Demo.Sheet" parent="Theme.AppCompat.DayNight.Dialog">
-    <item name="android:windowBackground">@android:color/transparent</item>
-    <item name="android:windowIsFloating">false</item>
-    <item name="android:windowContentOverlay">@null</item>
-    <item name="android:backgroundDimEnabled">false</item>
-    <item name="android:windowAnimationStyle">@style/Anim.Sheet</item>
-  </style>
-  <style name="Anim.Sheet" parent="@android:style/Animation.Dialog">
-    <item name="android:windowEnterAnimation">@anim/sheet_enter</item>
-    <item name="android:windowExitAnimation">@anim/sheet_exit</item>
-  </style>
 </resources>

@@ -13,35 +13,47 @@ HecongChatActivity.start(context, HecongChatConfig("你的渠道ID"))
 就这一行。文件选择、运行时权限、返回键、键盘避让、深浅色跟随全部内置。
 渠道 ID 在工作台「App 渠道」页复制,**不需要配任何域名**。
 
-只有要用**未读回调**(不打开客服页也能拿未读数、访客标识)时,才需要在 Application 里加一句:
+只有要用**未读回调**(不打开客服页也能拿未读数)时,才需要在 Application 里加一句:
 
 ```kotlin
 HecongChat.configure(this, HecongChatConfig("你的渠道ID"))  // 只登记参数,零联网,放这里合规
 HecongChat.startUnreadTracking(myListener)                 // 会联网,放在同意隐私政策之后
 ```
 
-> 想把聊天嵌进自己的页面(自己画顶栏 / 底部弹层 / 分栏)才需要 `HecongChatView`,
-> 那时有三段系统回调要自己转发 —— 范本见 `ChatActivity.kt`,文件头把"不做会怎样"逐条写清了。
-
 **深浅色**:聊天页**默认就跟随你的 App**(`config.colorScheme` 默认 `host`),你一行代码都不用写。
-本工程「我的」页那个开关只切换 App 自己的主题,**没有任何联动聊天页的代码** —— 它就是这条默认行为
-的活证据。想强制固定某一档就设 `light`/`dark`,想让渠道后台说了算就设 `auto`(详 `DemoTheme.kt`)。
+本工程「界面形态 → 深浅色」那个开关只切换 App 自己的主题,**没有任何联动聊天页的代码** —— 它就是
+这条默认行为的活证据。想强制固定某一档就设 `light`/`dark`,想让渠道后台说了算就设 `auto`(详 `DemoTheme.kt`)。
+
+## 页面结构:四个能力页(与 iOS 示范 App 逐项对位)
+
+示范 App 只演示**常用、且适合在 App 里演示**的场景(给试用者看效果、给对接的技术人员抄作业),
+不追求覆盖全部接口 —— 纯文字说明类的内容(权限时机、离线推送接法、宿主接管回调、命令透传)
+归接入文档。
+
+| 页 | 覆盖 |
+|---|---|
+| **界面形态**(首页) | 四档承载形态、标题栏、深浅色、语言 —— 租户最先关心"长什么样" |
+| **身份与会员** | 示范会员资料演示台、identify / resetUser **成对**、未读跟踪(开关 + 带徽标的客服入口示范) |
+| **高级扩展** | 技能组指派、商品 / 订单选择器 |
+| **配置与诊断** | 渠道配置、诊断信息、会话事件流水 |
+
+**跟 iOS 的两处平台差异(不是漏做)**:① 标准档的标题栏在安卓由 SDK 原生绘制(安卓没有宿主导航栈),
+所以「标题栏配色」对安卓标准档生效、iOS 只对弹层档生效;② 弹层档安卓只有一种顶栏形态,iOS 有"系统导航栏 /
+渠道标题栏"两档。**其余场景两端逐项一致**。
 
 ## 文件导览:哪些是接入示范,哪些是 demo 自己的架子
 
 | 文件 | 性质 | 看它干什么 |
 |---|---|---|
-| `DemoApp.kt` | ✅ **接入示范** | 全局登记 + 未读 / 访客标识两个回调怎么接(①②③) |
-| `ChatActivity.kt` | ✅ **接入示范** | 嵌进自己页面的六件事(①~⑥),每条注明不做会怎样 |
-| `CustomHeaderChatActivity.kt` | ✅ **接入示范** | 自己画标题栏 + `onHeaderIdentityChanged` 三态渲染 + 真头像加载 |
-| `SheetChatDialog.kt` | ✅ **接入示范** | 底部弹层承载;含 Dialog 场景要自己设键盘策略这个坑 |
-| `CatalogActions.kt` | ✅ 接入示范 + 演示混编 | 每个方法注释里标了是哪一类,照抄前先看那一行 |
-| `MinePage.kt` | 🔶 半架子 | 「在线客服」入口(①②)与「深色模式」开关(③)是真接入点,其余是假菜单 |
-| `DemoTheme.kt` | ✅ **接入示范** | 深浅色:App 主导、聊天页跟随 |
-| `MainActivity.kt` / `CatalogPage.kt` / `DiagnosticsActivity.kt` | 🔧 示范工程脚手架 | 双 Tab 框架、场景清单、诊断页,接入时不需要 |
-| `DemoConfig.kt` | 🔧 示范工程脚手架 | 三档渠道(local/demo/custom)是为了演示切换,你实际接入只有一个渠道 ID |
-| `ChannelSetup.kt` | 🔧 示范工程脚手架 | 渠道 ID 没配好时拦一道并引导去填,接入时不需要 |
-| `ui/` 目录 | 🔧 示范工程脚手架 | 设计 token、组件层与极简头像加载,换成你自己的设计体系 / Glide / Coil |
+| `DemoApp.kt` | ✅ **接入示范** | 全局登记 + 未读 / 自定义按钮 / 外链接管 / 会话事件回调怎么接 |
+| `ChatLaunch.kt` | ✅ **接入示范** | 四档承载形态的标准写法,每个方法可直接抄 |
+| `CustomHeaderChatActivity.kt` | ✅ **接入示范** | 嵌入档:自家顶栏 + `HecongChatFragment` + `onHeaderIdentityChanged` 三态渲染 |
+| `DemoTheme.kt` | ✅ **接入示范** | 深浅色:App 主导、聊天页跟随(零联动代码) |
+| `DevCapabilityActions.kt` | ✅ 接入示范 | 技能组指派、选择器注册(工作台配不出来、必须写代码的那几样) |
+| `*Page.kt` / `DemoScene.kt` / `MainActivity.kt` | 🔧 脚手架 | 四个能力页的清单声明与分页装配,接入时不需要 |
+| `DemoMemberProfile.kt` / `MemberProfileActivity.kt` | 🔧 脚手架 | 示范会员资料演示台(可填写并持久化;缺省会员 ID 按设备生成),接入时取你自己的登录用户 |
+| `DemoConfig.kt` / `DiagnosticsActivity.kt` / `ChannelSetup.kt` | 🔧 脚手架 | 三档渠道、诊断页、渠道未配拦一道,接入时不需要 |
+| `ui/` 目录 | 🔧 脚手架 | 设计 token、组件层、说明卡与极简头像加载,换成你自己的设计体系 / Glide / Coil |
 
 ## 界面与设计系统
 
@@ -79,12 +91,11 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 > **SDK 开发者本地联调**:模拟器要把四个端口都 `adb reverse` 过去,少一个聊天页会报 Network error:
 > ```bash
-> adb reverse tcp:5177 tcp:5177   # 插座 / 骨架页
-> adb reverse tcp:5175 tcp:5175   # 聊天窗 chunk(2026-08-18 补:漏了它就是 Network error)
+> adb reverse tcp:5175 tcp:5175   # 插座 + 聊天窗 chunk(demo:link 默认端口,两者同源)
 > adb reverse tcp:3024 tcp:3024   # 后端 API
 > adb reverse tcp:17108 tcp:17108 # 本地调试通道
 > ```
 > (iOS 模拟器与宿主共用 localhost,无需这一步。)
 
 DEBUG 构建默认走内部联调渠道(`src/debug/.../LocalEnv.kt`);要连你自己的渠道,
-进 App →「示例 → 配置与诊断 → 渠道配置」填 ID 即可,不用改代码。
+进 App →「配置与诊断 → 渠道配置」填 ID 即可,不用改代码。

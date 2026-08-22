@@ -21,10 +21,10 @@ android {
   }
 
   namespace = "com.hecong.chatdemo"
-  compileSdk = 34
+  compileSdk = 35
 
   defaultConfig {
-    applicationId = "com.hecong.chatdemo"
+    applicationId = "com.aihecong.chatdemo" // 与正式 App com.aihecong.* 同前缀(owner 2026-08-21)
     minSdk = 21
     targetSdk = 34
     versionCode = 1
@@ -42,6 +42,6 @@ android {
 
 dependencies {
   // ⬇️ 这一行就是接入所需的全部依赖声明
-  implementation("com.aihecong:hecong-chat-sdk:0.2.0")
+  implementation("com.aihecong:hecong-chat-sdk:0.3.0")
   implementation("androidx.appcompat:appcompat:1.6.1")
 }
