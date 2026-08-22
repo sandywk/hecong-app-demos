@@ -14,7 +14,7 @@
 **Android**(`build.gradle.kts`):
 
 ```kotlin
-implementation("com.aihecong:hecong-chat-sdk:0.3.0")
+implementation("com.aihecong:hecong-chat-sdk:0.3.1")
 ```
 
 ```kotlin

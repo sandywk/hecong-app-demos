@@ -39,7 +39,6 @@ final class CustomHeaderChatViewController: UIViewController, HecongChatDelegate
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = DemoColor.surface
-    navigationController?.setNavigationBarHidden(true, animated: false) // 用我自己的顶栏
 
     let header = buildHeader()
     view.addSubview(header)
@@ -65,6 +64,20 @@ final class CustomHeaderChatViewController: UIViewController, HecongChatDelegate
 
     // SDK 缓存的那份:页面重建时立刻画对,不用干等下一次变化
     if let cached = HecongChat.shared.headerIdentity { render(cached) }
+  }
+
+  // 自己画顶栏 → 隐藏系统导航栏。**在 viewWillAppear 隐藏、viewWillDisappear 还原**(不是 viewDidLoad
+  // 一次性隐藏):这样 push 进来 / pop 回去 / 侧滑到一半又松手,导航栏都跟着转场动画走,上一页
+  // 不会被我们"顺手"留成没导航栏。导航栏隐藏期间的**系统侧滑返回**由 SDK 的聊天子页保活
+  // (HecongSwipeBackKeeper,只在你没自己管 delegate 时接管),这里不必再写。
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    navigationController?.setNavigationBarHidden(true, animated: animated)
+  }
+
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    navigationController?.setNavigationBarHidden(false, animated: animated)
   }
 
   private func buildHeader() -> UIView {
