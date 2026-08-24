@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 示范 App 走 TestFlight 分发(scripts/native/publish-demo-ios.ts 用):
+	     导出 = 直接上传 App Store Connect,不落本地 ipa;签名由 Xcode 自动管理
+	     (需要 ASC API 密钥 + -allowProvisioningUpdates,凭据见 app-sdk-release 技能的 CREDENTIALS.md)。
+	     租户 clone 示范工程不需要这个文件,它只服务我们自己的分发。 -->
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>destination</key>
+	<string>upload</string>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<key>teamID</key>
+	<string>5JDH379AFS</string>
+	<key>uploadSymbols</key>
+	<true/>
+	<!-- 构建号由脚本按时间戳生成(202608221530 这种),不让 Xcode 代管 —— 工单里要记得下是哪个号 -->
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+</dict>
+</plist>

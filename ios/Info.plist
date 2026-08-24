@@ -21,8 +21,22 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>UILaunchScreen</key>
-	<dict/>
+	<!-- 启动页:最低 iOS 13 的 App 上传 ASC 必须给 storyboard(UILaunchScreen 只对 MinimumOSVersion ≥14 算数,
+	     2026-08-22 TestFlight 首传被拒时实测);空白启动图即可 -->
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<!-- 屏幕方向:ASC 上传硬要求(缺了直接 Invalid bundle)。iPhone 竖屏;iPad 四向(支持分屏多任务的前提) -->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
 	<!-- 宿主 APP 必配(缺 NSMicrophoneUsageDescription 是闪退不是报错):
 	     语音消息要麦克风、拍摄要相机 —— 不用对应功能可删对应键 -->
 	<key>NSMicrophoneUsageDescription</key>

@@ -61,6 +61,7 @@
 				AA10000000000000000000B0 /* Sources */,
 				AA10000000000000000000B1 /* Frameworks */,
 				AA10000000000000000000B3 /* Resources */,
+				AA10000000000000000000B4 /* Strip local-dev ATS (Release) */,
 			);
 			buildRules = (
 			);
@@ -109,6 +110,24 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		AA10000000000000000000B4 /* Strip local-dev ATS (Release) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Strip local-dev ATS (Release)";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/sh\n# Release 构建自动剥掉 Info.plist 里「本地联调专用」的 ATS 段(NSAllowsLocalNetworking)。\n# 那段只为 DEBUG 连 localhost 插座存在;线上档全 https 用不到。写成构建机制而不是注释里的\n# \"发布版记得删\"——能靠人记住的事早就记住了,要机制不要规则。\n# 改的是**产物里的** Info.plist(TARGET_BUILD_DIR/INFOPLIST_PATH),源文件不动;\n# 代码签名发生在所有 build phase 之后,所以这里改完再签,签名完整。\nset -e\nif [ \"${CONFIGURATION}\" != \"Release\" ]; then exit 0; fi\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\nif /usr/libexec/PlistBuddy -c \"Print :NSAppTransportSecurity\" \"$PLIST\" >/dev/null 2>&1; then\n  /usr/libexec/PlistBuddy -c \"Delete :NSAppTransportSecurity\" \"$PLIST\"\n  echo \"note: stripped NSAppTransportSecurity from ${INFOPLIST_PATH} (Release)\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXResourcesBuildPhase section */
 		AA10000000000000000000B3 /* Resources */ = {
@@ -180,7 +199,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.3.1;
+				MARKETING_VERSION = 0.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aihecong.chatdemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -199,7 +218,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.3.1;
+				MARKETING_VERSION = 0.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aihecong.chatdemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -235,7 +254,7 @@
 			repositoryURL = "https://github.com/sandywk/hecong-ios-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.3.1;
+				minimumVersion = 0.3.4;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

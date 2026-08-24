@@ -95,6 +95,28 @@ class DemoApp : Application() {
     // ⚠️ 未读跟踪**默认关闭**,SDK 不会自己开。真实接入:按你自己 App 里"消息提醒"开关的
     // 持久化状态决定要不要在启动时开启 —— 下面这行就是这个姿势(示范开关在「身份与会员 → 未读跟踪」)。
     DemoUnreadTracking.restoreIfWanted(this)
+
+    // ── 网络权限前置(部分国产 ROM,owner 2026-08-24):MIUI 等对侧载 App 在**首次联网**时
+    // 才弹「允许联网?」,与国行 iOS「无线数据」同款时序问题 —— 不预热则弹窗出现在点开
+    // 聊天页报错之后,还得手动重试。启动时对静态资源域发一个轻量 HEAD 把它前置;结果不
+    // 消费、失败无所谓(标准安卓 INTERNET 装即授予、无弹窗,这一步是空跑零副作用)。
+    // 真实接入若有隐私政策门,这一步应放在用户同意之后(同上面 configure 注释的合规口径)。
+    warmUpNetworkPermission()
+  }
+
+  private fun warmUpNetworkPermission() {
+    Thread {
+      runCatching {
+        val conn =
+          java.net.URL("https://assets.aihecong.com/sdk/hecong-link.js").openConnection()
+            as java.net.HttpURLConnection
+        conn.requestMethod = "HEAD"
+        conn.connectTimeout = 5000
+        conn.readTimeout = 5000
+        conn.responseCode
+        conn.disconnect()
+      }
+    }.start()
   }
 }
 

@@ -19,6 +19,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     // 持久化状态决定要不要在启动时开启 —— 下面这行就是这个姿势(示范开关在「身份与会员 → 未读跟踪」)。
     DemoFacadeDelegate.shared.restoreUnreadTrackingIfWanted()
 
+    // ── 网络权限前置(国行 iOS,owner 2026-08-24):系统的「无线数据」弹窗只在 App **首次
+    // 发网络请求**时出现,没有主动申请的 API。不预热的话首次联网发生在点开聊天页 —— 用户
+    // 看到的顺序是「先报网络错误 → 再弹权限 → 还得手动重试」。启动时对静态资源域发一个
+    // 轻量 HEAD 把弹窗前置;结果不消费、失败无所谓(断网/被拒时聊天页自有兜底页 + 重试)。
+    // 真实接入若有隐私政策门,这一步应放在用户同意之后(同上面 configure 注释的合规口径)。
+    warmUpNetworkPermission()
+
     DemoStyle.installGlobalAppearance()
 
     // 四个能力页,详 DemoTabBarController 头注释。
@@ -34,6 +41,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     applyAutomationHooks(root: root)
     return true
+  }
+
+  /// 见 didFinishLaunching 里调用处的注释(国行 iOS「无线数据」弹窗前置)。
+  /// 目标选 SDK 静态资源域的插座文件:体积小、必然存在、与聊天页首个请求同域。
+  private func warmUpNetworkPermission() {
+    guard let url = URL(string: "https://assets.aihecong.com/sdk/hecong-link.js") else { return }
+    var request = URLRequest(url: url)
+    request.httpMethod = "HEAD"
+    URLSession.shared.dataTask(with: request).resume()
   }
 
   /// 验收用:`-hcUser <id>` 指定本次要绑的会员,缺省用演示台里那份。

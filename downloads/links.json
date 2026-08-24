@@ -1,0 +1,12 @@
+{
+  "landing": "https://assets.aihecong.com/app-demo/index.html",
+  "android": {
+    "apk": "https://assets.aihecong.com/app-demo/android/HecongChatDemo-latest.apk",
+    "github": "https://github.com/sandywk/hecong-app-demos/releases",
+    "published": "0.3.4"
+  },
+  "ios": {
+    "testflight": "https://testflight.apple.com/join/Ue1vqhcv",
+    "published": "0.3.4"
+  }
+}
