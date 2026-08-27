@@ -24,6 +24,7 @@ import com.hecong.chatdemo.ui.TabBarHandle
 import com.hecong.chatdemo.ui.TabItem
 import com.hecong.chatdemo.ui.add
 import com.hecong.chatdemo.ui.addFill
+import com.hecong.chatsdk.HecongChat
 import com.hecong.chatdemo.ui.column
 import com.hecong.chatdemo.ui.tabBar
 import java.lang.ref.WeakReference
@@ -63,6 +64,24 @@ class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     live = WeakReference(this)
+
+    // ④ 预下载首屏文件 —— **真实接入照抄这一行的位置**。
+    //
+    // 🔴 **为什么在这里,而不是在 DemoApp.onCreate 跟 configure 放一起**:
+    // `configure` 是零活动的(只记参数),所以允许 APP 一启动就调;而 `prewarm` **会联网**。
+    // 国内应用商店(华为/小米尤严)审核的第一杀手就是「用户同意隐私政策前第三方 SDK 就联网」,
+    // 出事是**你的 APP 被拒审 / 下架**。主界面起来 = 用户已经进了 APP,演示工程以此等价
+    // "已同意隐私政策"这一时刻;**你的真实 APP 请放在自己那颗"同意"按钮之后**。
+    //
+    // 不调也不亏:它只让**第一次**打开客服更快。
+    HecongChat.prewarm(this)
+
+    // 验收钩子(**演示工程自己用的,接入时不需要**;对位 iOS 的 -auto* 那批):
+    //   adb shell am start -n <pkg>/.MainActivity --es hcAuto open
+    // 直接打开标准档聊天页。退出/再打开由 adb 控制(返回键 + 再 start),更贴近真实操作。
+    if (intent?.getStringExtra("hcAuto") == "open") {
+      window.decorView.postDelayed({ ChatLaunch.standard(this) }, 400)
+    }
 
     pages = listOf(appearancePage(this), identityPage(this), advancedPage(this), toolboxPage(this))
     val container = FrameLayout(this)

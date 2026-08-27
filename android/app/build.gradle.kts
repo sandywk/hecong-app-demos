@@ -24,7 +24,7 @@ android {
   compileSdk = 35
 
   // 版本跟壳走(便于对着截图问"你装的哪版"):直接读事实源,不留手抄副本。
-  val shellVersion = "0.3.4" // 同步时固化(公开仓没有 monorepo 的 version.json)
+  val shellVersion = "0.3.5" // 同步时固化(公开仓没有 monorepo 的 version.json)
   val (vMajor, vMinor, vPatch) = shellVersion.split('.').map { it.toInt() }
 
   defaultConfig {
@@ -62,6 +62,6 @@ android {
 
 dependencies {
   // ⬇️ 这一行就是接入所需的全部依赖声明
-  implementation("com.aihecong:hecong-chat-sdk:0.3.4")
+  implementation("com.aihecong:hecong-chat-sdk:0.3.5")
   implementation("androidx.appcompat:appcompat:1.6.1")
 }

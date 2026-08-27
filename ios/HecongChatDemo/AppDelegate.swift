@@ -39,6 +39,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     // App 自身的深浅色(用户上次的选择);聊天页会跟着它走,详 DemoTheme
     DemoTheme.apply(to: window)
 
+    // 主界面已就绪 = 用户已经进了 APP(演示工程等价于"已同意隐私政策"这一时刻)→ 预下载
+    prewarmAfterConsent()
+
     applyAutomationHooks(root: root)
     return true
   }
@@ -62,6 +65,18 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     return DemoMemberProfile.userId
   }
 
+  /// 预下载首屏文件 —— **真实接入照抄这一行的位置**。
+  ///
+  /// 🔴 **必须在「用户已同意隐私政策」之后调**,不能塞进 `configure()`:
+  /// 那个方法是零活动的(允许 APP 一启动就调),而本方法**会联网**。国内应用商店
+  /// (华为/小米尤严)审核的第一杀手就是"用户同意隐私政策前第三方 SDK 就联网",
+  /// 出事是**租户被拒审/下架**。演示工程这里是在主界面起来之后调,等价于"用户已进入 APP"。
+  ///
+  /// 不调也不亏:它只让**第一次**打开更快;"退出再进很快"由备用页保活自动提供,零代码。
+  private func prewarmAfterConsent() {
+    HecongChat.shared.prewarm()
+  }
+
   /// 自动化测试钩子(simctl launch 传参驱动)——**演示工程自己用的,接入时不需要**。
   ///
   /// 命令行能启动模拟器却无法点击界面,没有这套钩子就无法自动验收各承载形态。
@@ -71,7 +86,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     let known = [
       "-autoOpenChat", "-autoIdentify", "-autoH5Header", "-autoDiagnostics", "-autoCustomHeader",
       "-autoCatalog", "-autoStandard", "-autoSheet", "-autoSheetH5", "-autoImmersive",
-      "-autoTab", "-autoMemberProfile", "-autoResetUser", "-autoDumpState", "-autoUnreadOn", "-autoUnreadOff", "-autoIdentifyOnly", "-autoResetInChat",
+      "-autoTab", "-autoMemberProfile", "-autoResetUser", "-autoDumpState", "-autoUnreadOn", "-autoUnreadOff", "-autoIdentifyOnly", "-autoResetInChat", "-autoPrewarmThenOpen", "-autoOpenCloseOpen", "-autoPrewarmThenReset",
     ]
     guard args.contains(where: known.contains) else { return }
     DispatchQueue.main.async {
@@ -99,6 +114,48 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         HecongChat.shared.startUnreadTracking(listener: DemoFacadeDelegate.shared); return
       }
       if args.contains("-autoUnreadOff") { HecongChat.shared.stopUnreadTracking(); return }
+      // 验收用:预热 → 等 N 秒 → 打开(量"备用页命中时打开有多快")
+      if args.contains("-autoPrewarmThenOpen") {
+        NSLog("HCPOOL prewarm called t=0")
+        HecongChat.shared.prewarm()
+        let delay = (args.firstIndex(of: "-autoPrewarmThenOpen").flatMap { i -> Double? in
+          i + 1 < args.count ? Double(args[i + 1]) : nil
+        }) ?? 6.0
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+          guard let nav = root.select(.appearance), let host = nav.topViewController else { return }
+          NSLog("HCPOOL opening t=\(delay)s")
+          ChatLaunch.standard(from: host)
+        }
+        return
+      }
+      // 验收用:预热 → 换人(resetUser) → 打开。命中即事故,必须重新加载。
+      if args.contains("-autoPrewarmThenReset") {
+        HecongChat.shared.prewarm()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
+          NSLog("HCPOOL resetUser (should invalidate pool)")
+          HecongChat.shared.resetUser()
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            guard let nav = root.select(.appearance), let host = nav.topViewController else { return }
+            ChatLaunch.standard(from: host)
+          }
+        }
+        return
+      }
+      // 验收用:打开 → 退出 → 再打开(量保活命中,这才是备用页真正的填充路径)
+      if args.contains("-autoOpenCloseOpen") {
+        guard let nav = root.select(.appearance), let host = nav.topViewController else { return }
+        NSLog("HCPOOL 第一次打开")
+        ChatLaunch.standard(from: host)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 7.0) {
+          NSLog("HCPOOL 退出(应入池)")
+          nav.popViewController(animated: true)
+          DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            NSLog("HCPOOL 第二次打开(应命中备用页)")
+            ChatLaunch.standard(from: nav.topViewController ?? host)
+          }
+        }
+        return
+      }
       if args.contains("-autoDumpState") {
         // 状态读出(验收用):把壳侧持久化的三个值打进系统日志。
         // 用日志而不是读 plist —— 模拟器的 preferences 守护进程有缓存回写,
