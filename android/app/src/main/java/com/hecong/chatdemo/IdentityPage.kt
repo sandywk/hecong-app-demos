@@ -49,10 +49,12 @@ fun identityPage(activity: Activity): ScenePage = ScenePage(activity, "身份与
           },
         ),
         DemoScene(
-          "更新会员资料", "updateUser 为增量更新:未传入的字段保持不变",
+          "更新会员资料", "资料变了再调一次 identify:传什么覆盖什么,未传入的字段保持不变",
           R.drawable.ic_square_pen,
           handler = { host ->
-            HecongChat.updateUser(DemoMemberProfile.profileJson(host), DemoMemberProfile.dataJson(host))
+            HecongChat.identify(
+              DemoMemberProfile.userId(host), DemoMemberProfile.profileJson(host), DemoMemberProfile.dataJson(host),
+            )
             alert(host, "已提交资料更新 —— 可在工作台的客户资料区核对。")
           },
         ),

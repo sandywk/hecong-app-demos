@@ -49,14 +49,14 @@ enum DemoMemberProfile {
     set { write(keyExtra, newValue) }
   }
 
-  /// `identify` / `updateUser` 的 profile 参数(标准字段)
+  /// `identify` 的 profile 参数(标准字段)
   static func profileDictionary() -> [String: Any] {
     var out: [String: Any] = ["name": name]
     if !avatarUrl.isEmpty { out["avatar"] = avatarUrl }
     return out
   }
 
-  /// `identify` / `updateUser` 的 data 参数(宿主自定义字段);没填返回 nil
+  /// `identify` 的 data 参数(宿主自定义字段);没填返回 nil
   static func dataDictionary() -> [String: Any]? {
     var out: [String: Any] = [:]
     for line in extraFields.split(separator: "\n") {

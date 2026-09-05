@@ -65,10 +65,11 @@ final class IdentityViewController: SceneListViewController {
                 message: "已绑定会员 \(DemoMemberProfile.userId)。\n\n此时聊天页尚未打开;之后任意时刻进入客服都会自动携带该身份。")
             }),
           DemoScene(
-            title: "更新会员资料", detail: "updateUser 为增量更新:未传入的字段保持不变",
+            title: "更新会员资料", detail: "资料变了再调一次 identify:传什么覆盖什么,未传入的字段保持不变",
             icon: DemoIcon.edit,
             handler: { host in
-              HecongChat.shared.updateUser(
+              HecongChat.shared.identify(
+                userId: DemoMemberProfile.userId,
                 profile: DemoMemberProfile.profileDictionary(),
                 data: DemoMemberProfile.dataDictionary())
               DemoStyle.alert(on: host, message: "已提交资料更新 —— 可在工作台的客户资料区核对。")

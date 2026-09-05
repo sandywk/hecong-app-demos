@@ -47,13 +47,13 @@ object DemoMemberProfile {
   fun setAvatarUrl(c: Context, v: String) = write(c, KEY_AVATAR, v)
   fun setExtraFields(c: Context, v: String) = write(c, KEY_EXTRA, v)
 
-  /** `identify` / `updateUser` 的 profile 参数(标准字段) */
+  /** `identify` 的 profile 参数(标准字段) */
   fun profileJson(c: Context): JSONObject = JSONObject().apply {
     put("name", name(c))
     avatarUrl(c).takeIf { it.isNotBlank() }?.let { put("avatar", it) }
   }
 
-  /** `identify` / `updateUser` 的 data 参数(宿主自定义字段);没填返回 null */
+  /** `identify` 的 data 参数(宿主自定义字段);没填返回 null */
   fun dataJson(c: Context): JSONObject? {
     val out = JSONObject()
     extraFields(c).lines().forEach { line ->
