@@ -15,8 +15,9 @@ enum ChatLaunch {
   /// ① 标准档:推入宿主导航栏承载 —— 顶栏即宿主那条,SDK 不绘制任何标题栏。
   /// 安卓对位:`HecongChatActivity.start(context, config)`。
   static func standard(from host: UIViewController) {
-    guard ChannelSetup.ensureReady(on: host), let nav = host.navigationController else { return }
-    let chat = HecongChat.shared.push(from: nav, config: DemoConfig.buildChatConfig())
+    guard ChannelSetup.ensureReady(on: host) else { return }
+    // SDK 自己找前台最上层页面的导航栈,不用递控制器(SwiftUI 工程同样一行)
+    guard let chat = HecongChat.shared.push(config: DemoConfig.buildChatConfig()) else { return }
     bind(chat)
   }
 
@@ -25,8 +26,10 @@ enum ChatLaunch {
   /// 安卓对位:`HecongChatActivity.startSheet(context, config)`。
   static func sheet(from host: UIViewController, useChannelHeader: Bool = false) {
     guard ChannelSetup.ensureReady(on: host) else { return }
-    let chat = HecongChat.shared.presentSheet(
-      from: host, config: DemoConfig.buildChatConfig(), useChannelHeader: useChannelHeader)
+    guard
+      let chat = HecongChat.shared.presentSheet(
+        config: DemoConfig.buildChatConfig(), useChannelHeader: useChannelHeader)
+    else { return }
     bind(chat)
   }
 
@@ -34,7 +37,8 @@ enum ChatLaunch {
   /// 安卓对位:`HecongChatActivity.startImmersive(context, config)`。
   static func immersive(from host: UIViewController) {
     guard ChannelSetup.ensureReady(on: host) else { return }
-    let chat = HecongChat.shared.presentImmersive(from: host, config: DemoConfig.buildChatConfig())
+    guard let chat = HecongChat.shared.presentImmersive(config: DemoConfig.buildChatConfig())
+    else { return }
     bind(chat)
   }
 
