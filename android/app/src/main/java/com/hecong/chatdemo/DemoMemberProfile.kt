@@ -6,6 +6,7 @@
 package com.hecong.chatdemo
 
 import android.content.Context
+import com.hecong.chatsdk.HecongProfile
 import org.json.JSONObject
 import kotlin.random.Random
 
@@ -47,10 +48,11 @@ object DemoMemberProfile {
   fun setAvatarUrl(c: Context, v: String) = write(c, KEY_AVATAR, v)
   fun setExtraFields(c: Context, v: String) = write(c, KEY_EXTRA, v)
 
-  /** `identify` 的 profile 参数(标准字段) */
-  fun profileJson(c: Context): JSONObject = JSONObject().apply {
-    put("name", name(c))
-    avatarUrl(c).takeIf { it.isNotBlank() }?.let { put("avatar", it) }
+  /** `identify` 的 profile 参数(系统内置字段)。
+   *  0.6.0 起是**类型化的 [HecongProfile]**,不再是裸 JSONObject —— 键名写错编译不过。 */
+  fun profile(c: Context): HecongProfile = HecongProfile().apply {
+    name = c.let { name(it) }
+    avatar = avatarUrl(c).takeIf { it.isNotBlank() }
   }
 
   /** `identify` 的 data 参数(宿主自定义字段);没填返回 null */

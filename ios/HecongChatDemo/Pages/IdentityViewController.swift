@@ -58,7 +58,7 @@ final class IdentityViewController: SceneListViewController {
             icon: DemoIcon.login,
             handler: { host in
               HecongChat.shared.identify(
-                userId: DemoMemberProfile.userId, profile: DemoMemberProfile.profileDictionary(),
+                userId: DemoMemberProfile.userId, profile: DemoMemberProfile.profile(),
                 data: DemoMemberProfile.dataDictionary())
               DemoStyle.alert(
                 on: host,
@@ -70,7 +70,7 @@ final class IdentityViewController: SceneListViewController {
             handler: { host in
               HecongChat.shared.identify(
                 userId: DemoMemberProfile.userId,
-                profile: DemoMemberProfile.profileDictionary(),
+                profile: DemoMemberProfile.profile(),
                 data: DemoMemberProfile.dataDictionary())
               DemoStyle.alert(on: host, message: "已提交资料更新 —— 可在工作台的客户资料区核对。")
             }),

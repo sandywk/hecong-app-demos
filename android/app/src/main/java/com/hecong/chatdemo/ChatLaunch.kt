@@ -74,7 +74,7 @@ object ChatLaunch {
       config.titleColor = 0xFFFFFFFF.toInt()
     }
     userId?.let {
-      HecongChat.identify(it, DemoMemberProfile.profileJson(host), DemoMemberProfile.dataJson(host))
+      HecongChat.identify(it, DemoMemberProfile.profile(host), DemoMemberProfile.dataJson(host))
     }
     HecongChatActivity.start(host, config)
   }

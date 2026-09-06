@@ -43,7 +43,7 @@ fun identityPage(activity: Activity): ScenePage = ScenePage(activity, "身份与
           R.drawable.ic_log_in,
           handler = { host ->
             HecongChat.identify(
-              DemoMemberProfile.userId(host), DemoMemberProfile.profileJson(host), DemoMemberProfile.dataJson(host),
+              DemoMemberProfile.userId(host), DemoMemberProfile.profile(host), DemoMemberProfile.dataJson(host),
             )
             alert(host, "已绑定会员 ${DemoMemberProfile.userId(host)}。\n\n此时聊天页尚未打开;之后任意时刻进入客服都会自动携带该身份。")
           },
@@ -53,7 +53,7 @@ fun identityPage(activity: Activity): ScenePage = ScenePage(activity, "身份与
           R.drawable.ic_square_pen,
           handler = { host ->
             HecongChat.identify(
-              DemoMemberProfile.userId(host), DemoMemberProfile.profileJson(host), DemoMemberProfile.dataJson(host),
+              DemoMemberProfile.userId(host), DemoMemberProfile.profile(host), DemoMemberProfile.dataJson(host),
             )
             alert(host, "已提交资料更新 —— 可在工作台的客户资料区核对。")
           },

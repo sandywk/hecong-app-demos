@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import com.hecong.chatsdk.HecongChatConfig;
 import com.hecong.chatsdk.HecongChatListener;
+import com.hecong.chatsdk.HecongProfile;
 import com.hecong.chatsdk.HecongChatView;
 
 import org.json.JSONException;
@@ -39,9 +40,19 @@ public class ChatActivity extends Activity {
     setContentView(chat);
     chat.load(config); // 合规:用户同意隐私政策后再调,此前 SDK 零活动
 
+    // ready 前调用会自动排队,ready 后补发。
+    // profile 是**类型化**的(0.6.0 起):字段名写错编译不过,不会再出现"资料静默没上去"。
+    // @JvmField ⇒ Java 侧就是公开字段,不用 getter/setter。
+    HecongProfile profile = new HecongProfile();
+    profile.name = "张三";
+    profile.phone = "13800000000";
+    chat.identify("u123", profile, null);
+
+    // 租户自建的业务字段走 data(动态 key,类型化不了)。
+    // ⚠️ key 必须先在工作台「自定义字段」里建好,否则后端丢弃 —— 丢了哪些会经
+    // HecongChatListener.onCustomFieldsIgnored 回执,SDK 也会打一条警告日志。
     try {
-      // ready 前调用会自动排队,ready 后补发
-      chat.identify("u123", new JSONObject().put("name", "张三"), null);
+      chat.identify("u123", profile, new JSONObject().put("vip_level", "gold"));
     } catch (JSONException ignored) {
     }
   }

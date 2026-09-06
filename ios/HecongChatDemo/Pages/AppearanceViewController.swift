@@ -97,6 +97,18 @@ final class AppearanceViewController: SceneListViewController {
         ]),
 
       DemoSceneGroup(
+        title: "宿主 UI 框架",
+        footer: "本示范工程是 UIKit;真实租户多数是 SwiftUI,所以单独补一页用纯 SwiftUI 写法调同一套 API。"
+          + "SwiftUI 里按钮回调没有 self,四档仍各一行 —— 但标准档因 SwiftUI 导航不是 UIKit 导航栈,"
+          + "会退化成全屏弹页,进去点一遍就能看到。",
+        scenes: [
+          DemoScene(
+            title: "SwiftUI 宿主", detail: "纯 SwiftUI 页面里打开四档承载形态",
+            icon: DemoIcon.settings,
+            handler: { SwiftUIHostDemo.push(from: $0) }),
+        ]),
+
+      DemoSceneGroup(
         title: "语言",
         footer: "缺省跟随系统语言。显式指定时与工作台的多语言配置协同,详见接入文档「多语言」章节。",
         scenes: [

@@ -4,6 +4,7 @@
 // 头像、自定义字段是不是你传的那份。写死一个假会员就永远只能验证"没报错",验证不了"对不对"。
 // 与渠道 ID 同一套模式(`DemoConfig` 的 custom 档,UserDefaults 持久化)。
 import Foundation
+import HecongChatSDK
 
 enum DemoMemberProfile {
   private static let keyUserId = "hecong.demo.member.userId"
@@ -50,10 +51,13 @@ enum DemoMemberProfile {
   }
 
   /// `identify` 的 profile 参数(标准字段)
-  static func profileDictionary() -> [String: Any] {
-    var out: [String: Any] = ["name": name]
-    if !avatarUrl.isEmpty { out["avatar"] = avatarUrl }
-    return out
+  /// `identify` 的 profile 参数(系统内置字段)。
+  /// 0.6.0 起是**类型化的 `HecongProfile`**,不再是裸字典 —— 键名写错编译不过。
+  static func profile() -> HecongProfile {
+    let p = HecongProfile()
+    p.name = name
+    if !avatarUrl.isEmpty { p.avatar = avatarUrl }
+    return p
   }
 
   /// `identify` 的 data 参数(宿主自定义字段);没填返回 nil

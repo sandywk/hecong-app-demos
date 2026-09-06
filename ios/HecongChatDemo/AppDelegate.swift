@@ -86,7 +86,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     let known = [
       "-autoOpenChat", "-autoIdentify", "-autoH5Header", "-autoDiagnostics", "-autoCustomHeader",
       "-autoCatalog", "-autoStandard", "-autoSheet", "-autoSheetH5", "-autoImmersive",
-      "-autoTab", "-autoMemberProfile", "-autoResetUser", "-autoDumpState", "-autoUnreadOn", "-autoUnreadOff", "-autoIdentifyOnly", "-autoResetInChat", "-autoPrewarmThenOpen", "-autoOpenCloseOpen", "-autoPrewarmThenReset",
+      "-autoTab", "-autoMemberProfile", "-autoResetUser", "-autoDumpState", "-autoUnreadOn", "-autoUnreadOff", "-autoIdentifyOnly", "-autoResetInChat", "-autoPrewarmThenOpen", "-autoOpenCloseOpen", "-autoPrewarmThenReset", "-autoSwiftUI",
     ]
     guard args.contains(where: known.contains) else { return }
     DispatchQueue.main.async {
@@ -108,6 +108,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       ] where args.contains(flag) {
         guard let nav = root.select(.appearance), let host = nav.topViewController else { return }
         ChatLaunch.openArchetype(mode, from: host)
+        return
+      }
+      // SwiftUI 宿主页(验收:纯 SwiftUI 写法调同一套打开 API)
+      if args.contains("-autoSwiftUI") {
+        guard let nav = root.select(.appearance), let host = nav.topViewController else { return }
+        SwiftUIHostDemo.push(from: host)
         return
       }
       if args.contains("-autoUnreadOn") {
@@ -170,7 +176,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       if args.contains("-autoIdentifyOnly") {
         // 只绑身份、**不打开聊天页** —— 租户"登录成功回调里调 identify"的真实形态
         HecongChat.shared.identify(
-          userId: Self.automationUserId(), profile: DemoMemberProfile.profileDictionary(),
+          userId: Self.automationUserId(), profile: DemoMemberProfile.profile(),
           data: DemoMemberProfile.dataDictionary())
         root.select(.identity)
         return

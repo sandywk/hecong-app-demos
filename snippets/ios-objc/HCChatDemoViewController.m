@@ -27,13 +27,28 @@
   [self.navigationController pushViewController:self.chat animated:YES];
 
   // ready 前调用会自动排队,ready 后补发 —— 不需要等回调再调
-  [self.chat identifyWithUserId:@"u123" profile:@{ @"name": @"张三" } data:nil];
+  // profile 是**类型化**的(0.6.0 起):字段名写错编译器当场提示,不会再"资料静默没上去"。
+  // ⚠️ ObjC 侧是 `incompatible pointer types` **警告**(不是错误)——
+  //    Swift / Kotlin / Java 那三种是硬报错;ObjC 工程建议开 -Werror 把它升级成错误。
+  HecongProfile *profile = [HecongProfile new];
+  profile.name = @"张三";
+  profile.phone = @"13800000000";
+  [self.chat identifyWithUserId:@"u123" profile:profile data:nil];
+
+  // 租户自建的业务字段走 data(动态 key,类型化不了)。key 必须先在工作台「自定义字段」建好,
+  // 否则后端丢弃 —— 丢了哪些经 `hecongChatDidIgnoreCustomFields:` 回执,SDK 也会打控制台警告。
+  [self.chat identifyWithUserId:@"u123" profile:profile data:@{ @"vip_level": @"gold" }];
 
   // 也可以**不打开聊天页就先绑身份**(登录成功那一刻调,之后进客服自动带上):
   // [[HecongChat shared] identifyWithUserId:@"u123" profile:@{ @"name": @"张三" } data:nil];
 }
 
 #pragma mark - HecongChatDelegate(全部可选)
+
+/// 传了工作台里没定义的自定义字段 —— 这几个 key 没生效,去工作台建出来或改成正确的 key
+- (void)hecongChatDidIgnoreCustomFields:(NSArray<NSString *> *)ignoredKeys {
+  NSLog(@"[demo] 未生效的自定义字段: %@", [ignoredKeys componentsJoinedByString:@", "]);
+}
 
 - (void)hecongChatUnreadDidChange:(NSInteger)count {
   // 更新 tab 角标 / 入口红点

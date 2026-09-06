@@ -78,7 +78,7 @@ enum ChatLaunch {
     DemoStyle.applyChatChrome(to: chat)
     if let userId = userId {
       chat.identify(
-        userId: userId, profile: DemoMemberProfile.profileDictionary(),
+        userId: userId, profile: DemoMemberProfile.profile(),
         data: DemoMemberProfile.dataDictionary())
     }
     bind(chat)
