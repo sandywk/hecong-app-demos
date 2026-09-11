@@ -62,7 +62,7 @@ HecongChat.startUnreadTracking(myListener)                 // 会联网,放在�
 
 - 色板 / 尺寸 / 字阶集中在 `app/src/main/res/values{,-night}/`,页面代码只引 token 不写死色值;
 - 图标由 `tools/gen-icons.py` 从 lucide 源码生成成 VectorDrawable(要加图标改那个脚本再跑,别手抄路径);
-- **零第三方 UI 依赖**(不引 Material Components / Compose)—— 与 SDK 本体"只依赖 androidx.webkit + core-ktx"
+- **零第三方 UI 依赖**(不引 Material Components / Compose)—— 与 SDK 本体"只依赖 androidx.core"
   的调性一致,也证明这套观感不需要额外包袱。
 
 ## ⚠️ 当前是"本地源码依赖",SDK 正式发版后要换成坐标
