@@ -3,10 +3,10 @@
   "android": {
     "apk": "https://assets.aihecong.com/app-demo/android/HecongChatDemo-latest.apk",
     "github": "https://github.com/sandywk/hecong-app-demos/releases",
-    "published": "0.6.1"
+    "published": "0.6.2"
   },
   "ios": {
     "testflight": "https://testflight.apple.com/join/Ue1vqhcv",
-    "published": "0.6.1"
+    "published": "0.6.2"
   }
 }
