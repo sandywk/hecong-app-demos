@@ -24,7 +24,7 @@ android {
   compileSdk = 35
 
   // 版本跟壳走(便于对着截图问"你装的哪版"):直接读事实源,不留手抄副本。
-  val shellVersion = "0.6.4" // 同步时固化(公开仓没有 monorepo 的 version.json)
+  val shellVersion = "0.7.0" // 同步时固化(公开仓没有 monorepo 的 version.json)
   val (vMajor, vMinor, vPatch) = shellVersion.split('.').map { it.toInt() }
 
   defaultConfig {
@@ -62,7 +62,7 @@ android {
 
 dependencies {
   // ⬇️ 这一行就是接入所需的全部依赖声明
-  implementation("com.aihecong:hecong-chat-sdk:0.6.4")
+  implementation("com.aihecong:hecong-chat-sdk:0.7.0")
   implementation("androidx.appcompat:appcompat:1.6.1")
   // SDK 只要求 androidx.core ≥ 1.6.0(compileSdk 30 的工程也能接入);你的工程用更高版本时
   // Gradle 自动取高的那个,无需任何配置。这里刻意用较新的 1.15.0,演示高版本 core 同样可用

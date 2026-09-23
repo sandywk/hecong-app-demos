@@ -86,7 +86,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     let known = [
       "-autoOpenChat", "-autoIdentify", "-autoH5Header", "-autoDiagnostics", "-autoCustomHeader",
       "-autoCatalog", "-autoStandard", "-autoSheet", "-autoSheetH5", "-autoImmersive",
-      "-autoTab", "-autoMemberProfile", "-autoResetUser", "-autoDumpState", "-autoUnreadOn", "-autoUnreadOff", "-autoIdentifyOnly", "-autoResetInChat", "-autoPrewarmThenOpen", "-autoOpenCloseOpen", "-autoPrewarmThenReset", "-autoSwiftUI",
+      "-autoTab", "-autoMemberProfile", "-autoResetUser", "-autoDumpState", "-autoUnreadOn", "-autoUnreadOff", "-autoIdentifyOnly", "-autoResetInChat", "-autoPrewarmThenOpen", "-autoOpenCloseOpen", "-autoPrewarmThenReset", "-autoSwiftUI", "-autoPresend",
     ]
     guard args.contains(where: known.contains) else { return }
     DispatchQueue.main.async {
@@ -108,6 +108,18 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       ] where args.contains(flag) {
         guard let nav = root.select(.appearance), let host = nav.topViewController else { return }
         ChatLaunch.openArchetype(mode, from: host)
+        return
+      }
+      // 带入咨询内容(web-sdk-presend.md):-autoPresend product | order | clear | text —— 跑「高级扩展」页演示入口
+      // (text = 只带文字,文档截图「预填文字」那张用)
+      if let idx = args.firstIndex(of: "-autoPresend"), idx + 1 < args.count {
+        guard let nav = root.select(.advanced), let host = nav.topViewController else { return }
+        switch args[idx + 1] {
+        case "order": DevCapabilityActions.presendOrderLater(on: host)
+        case "clear": DevCapabilityActions.presendThenClear(on: host)
+        case "text": DevCapabilityActions.presendTextOnly(on: host)
+        default: DevCapabilityActions.presendProduct(on: host)
+        }
         return
       }
       // SwiftUI 宿主页(验收:纯 SwiftUI 写法调同一套打开 API)

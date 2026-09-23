@@ -69,6 +69,61 @@ enum DevCapabilityActions {
     DemoStyle.toast("已撤掉所有自定义按钮")
   }
 
+  // ---------------- 带入咨询内容(web-sdk-presend.md)----------------
+
+  /// **从商品页进客服**:打开之前就把当前商品 + 一句话带进去。
+  ///
+  /// 接入时你要抄的就是 `setPresend(...)` 这一行,**在打开聊天页之前调**即可 ——
+  /// SDK 会在聊天页起来时自动带上(只带一次)。卡片摆在消息流末尾,**访客点「发送」才发**。
+  static func presendProduct(on host: UIViewController) {
+    HecongChat.shared.setPresend(text: presendText, card: demoProductCard) // ← 接入时就这一行
+    ChatLaunch.push(from: host)
+  }
+
+  /// **聊天页开着时带入**:先打开,3 秒后再带一张订单卡(演示运行时调用同样生效)。
+  static func presendOrderLater(on host: UIViewController) {
+    ChatLaunch.push(from: host)
+    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+      HecongChat.shared.setPresend(text: nil, card: demoOrderCard())
+    }
+  }
+
+  /// **撤掉待发卡片**:带入后打开,3 秒后 `clearPresend()`(演示撤回)。
+  static func presendThenClear(on host: UIViewController) {
+    HecongChat.shared.setPresend(text: nil, card: demoProductCard)
+    ChatLaunch.push(from: host)
+    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { HecongChat.shared.clearPresend() }
+  }
+
+  /// 演示预填文字(与文档站「带入咨询内容」页同一句)
+  static let presendText = "我想问一下这款沙发，预算 5000~8000 元，客厅宽 3 米 2 放得下吗？"
+
+  /// 只带文字(不带卡片)打开 —— 自动化钩子 `-autoPresend text` 用
+  static func presendTextOnly(on host: UIViewController) {
+    HecongChat.shared.setPresend(text: presendText, card: nil)
+    ChatLaunch.push(from: host)
+  }
+
+  private static func money(_ amount: Int) -> [String: Any] { ["amount": amount, "currency": "CNY"] }
+
+  private static var demoProductCard: [String: Any] {
+    [
+      "cardType": "product", "title": "示例商品名称", "description": "示例规格描述",
+      "price": money(19900), "originalPrice": money(29900),
+    ]
+  }
+
+  private static func demoOrderCard() -> [String: Any] {
+    [
+      "cardType": "order", "orderId": "O8812345", "title": "北欧实木沙发 等 2 件",
+      "total": money(359800), "status": "shipped", "createdAt": Int(Date().timeIntervalSince1970 * 1000),
+      "items": [
+        ["name": "北欧实木三人位沙发", "quantity": 1, "price": money(329900)],
+        ["name": "亚麻抱枕 · 浅灰", "quantity": 1, "price": money(29900)],
+      ],
+    ]
+  }
+
   // ---------------- 演示用脚手架(接入时不需要)----------------
 
   /// 弹个输入框收技能组名 —— 演示 APP 要能让租户填自己的组名,所以不写死

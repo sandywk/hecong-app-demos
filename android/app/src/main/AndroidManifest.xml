@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 权限说明(给租户开发者):SDK 自身零权限声明,下面两条由宿主 APP 按用到的功能声明,
+<!-- 权限说明(给租户开发者):SDK 自身零权限声明,下面几条由宿主 APP 按用到的功能声明,
      并配合运行时申请(转发见 ChatActivity)。不用语音/拍摄就删掉对应行。 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
   <uses-permission android:name="android.permission.INTERNET" />
+  <!-- 🔴 语音消息要**成对**声明这两条,缺一不可(2026-09-22 真机踩到):
+       WebView 内核(Chromium AudioManagerAndroid)选录音设备时同时校验两者,缺
+       MODIFY_AUDIO_SETTINGS = 直接返回"无可用录音设备"→ 用户明明点了允许,网页却拿到
+       NotReadableError(界面提示"麦克风被占用"),重试、重启 App 都没用。
+       它是普通权限:安装即有、不弹窗、不采集任何数据,不涉及合规说明层。 -->
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
+  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
   <uses-permission android:name="android.permission.CAMERA" />
 
   <application

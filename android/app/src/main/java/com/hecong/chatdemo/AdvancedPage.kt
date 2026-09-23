@@ -27,6 +27,24 @@ fun advancedPage(activity: Activity): ScenePage = ScenePage(activity, "高级扩
       ),
     ),
     DemoSceneGroup(
+      "带入咨询内容",
+      "把访客正在看的商品 / 订单 / 一句话带进聊天:文字填进输入框,卡片摆在消息流末尾,访客点「发送」才发,永不自动发送。",
+      listOf(
+        DemoScene(
+          "从商品页进入", "setPresend(文字, 商品卡) —— 打开前调,聊天页起来时带上一次",
+          R.drawable.ic_shopping_bag, handler = { DevCapabilityActions.presendProduct(it) },
+        ),
+        DemoScene(
+          "聊天中带入订单", "聊天页开着时调 setPresend 同样生效(3 秒后带入)",
+          R.drawable.ic_package, handler = { DevCapabilityActions.presendOrderLater(it) },
+        ),
+        DemoScene(
+          "撤掉待发卡片", "clearPresend —— 带入后 3 秒撤回",
+          R.drawable.ic_trash_2, handler = { DevCapabilityActions.presendThenClear(it) },
+        ),
+      ),
+    ),
+    DemoSceneGroup(
       "输入区扩展",
       "选择器数据必须在 onActionClick 回调中实时提供,SDK 刻意不做缓存 —— 商品与订单列表随登录态和库存变化,重放陈旧数据会把错误卡片发给客服。",
       listOf(

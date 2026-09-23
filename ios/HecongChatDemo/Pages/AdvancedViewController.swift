@@ -35,6 +35,24 @@ final class AdvancedViewController: SceneListViewController {
         ]),
 
       DemoSceneGroup(
+        title: "带入咨询内容",
+        footer: "把访客正在看的商品 / 订单 / 一句话带进聊天:文字填进输入框,卡片摆在消息流末尾,访客点「发送」才发,永不自动发送。",
+        scenes: [
+          DemoScene(
+            title: "从商品页进入", detail: "setPresend(文字, 商品卡) —— 打开前调,聊天页起来时带上一次",
+            icon: DemoIcon.product,
+            handler: { DevCapabilityActions.presendProduct(on: $0) }),
+          DemoScene(
+            title: "聊天中带入订单", detail: "聊天页开着时调 setPresend 同样生效(3 秒后带入)",
+            icon: DemoIcon.order,
+            handler: { DevCapabilityActions.presendOrderLater(on: $0) }),
+          DemoScene(
+            title: "撤掉待发卡片", detail: "clearPresend —— 带入后 3 秒撤回",
+            icon: DemoIcon.trash,
+            handler: { DevCapabilityActions.presendThenClear(on: $0) }),
+        ]),
+
+      DemoSceneGroup(
         title: "输入区扩展",
         footer: "选择器数据必须在 didClickAction 回调中实时提供,SDK 刻意不做缓存 —— 商品与订单列表随登录态和库存变化,重放陈旧数据会把错误卡片发给客服。",
         scenes: [

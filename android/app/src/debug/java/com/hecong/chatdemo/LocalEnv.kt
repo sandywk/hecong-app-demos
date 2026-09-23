@@ -7,6 +7,6 @@
 package com.hecong.chatdemo
 
 internal object LocalEnv {
-  val channelIdOrNull: String? = "01a00edc-a820-71d1-bf6a-dd78a494ac79"
+  val channelIdOrNull: String? = "01a0993a-ee67-768f-b7c8-7a8ce5f61b8d"
   val loaderUrlOrNull: String? = "http://localhost:5175/hecong-link.js"
 }

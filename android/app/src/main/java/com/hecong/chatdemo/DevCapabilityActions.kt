@@ -10,11 +10,15 @@ package com.hecong.chatdemo
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.os.Handler
+import android.os.Looper
 import android.widget.EditText
 import android.widget.Toast
 import com.hecong.chatsdk.HecongChat
 import com.hecong.chatsdk.HecongChatActivity
 import com.hecong.chatsdk.HecongRouting
+import org.json.JSONArray
+import org.json.JSONObject
 
 object DevCapabilityActions {
 
@@ -87,6 +91,61 @@ object DevCapabilityActions {
     listOf(ACTION_PRODUCT, ACTION_ORDER).forEach { HecongChat.unregisterAction(it) }
     toast(activity, "已撤掉所有自定义按钮")
   }
+
+  // ---------------- 带入咨询内容(web-sdk-presend.md)----------------
+
+  /**
+   * **从商品页进客服**:打开之前就把当前商品 + 一句话带进去。
+   *
+   * 接入时你要抄的就是 `setPresend(...)` 这一行,**在打开聊天页之前调**即可 ——
+   * SDK 会在聊天页起来时自动带上(只带一次)。卡片摆在消息流末尾,**访客点「发送」才发**。
+   */
+  fun presendProduct(activity: Activity) {
+    if (!ChannelSetup.ensureReady(activity)) return
+    HecongChat.setPresend(PRESEND_TEXT, demoProductCard()) // ← 接入时就这一行
+    HecongChatActivity.start(activity, DemoConfig.buildChatConfig(activity))
+  }
+
+  /** **聊天页开着时带入**:先打开,3 秒后再带一张订单卡(演示运行时调用同样生效)。 */
+  fun presendOrderLater(activity: Activity) {
+    if (!ChannelSetup.ensureReady(activity)) return
+    HecongChatActivity.start(activity, DemoConfig.buildChatConfig(activity))
+    Handler(Looper.getMainLooper()).postDelayed({ HecongChat.setPresend(null, demoOrderCard()) }, 3000)
+  }
+
+  /** **撤掉待发卡片**:带入后打开,3 秒后 `clearPresend()`(演示撤回)。 */
+  fun presendThenClear(activity: Activity) {
+    if (!ChannelSetup.ensureReady(activity)) return
+    HecongChat.setPresend(null, demoProductCard())
+    HecongChatActivity.start(activity, DemoConfig.buildChatConfig(activity))
+    Handler(Looper.getMainLooper()).postDelayed({ HecongChat.clearPresend() }, 3000)
+  }
+
+  /** 演示预填文字(与文档站「带入咨询内容」页同一句) */
+  private const val PRESEND_TEXT = "我想问一下这款沙发，预算 5000~8000 元，客厅宽 3 米 2 放得下吗？"
+
+  private fun money(amount: Int) = JSONObject().put("amount", amount).put("currency", "CNY")
+
+  private fun demoProductCard() = JSONObject()
+    .put("cardType", "product")
+    .put("title", "示例商品名称")
+    .put("description", "示例规格描述")
+    .put("price", money(19900))
+    .put("originalPrice", money(29900))
+
+  private fun demoOrderCard() = JSONObject()
+    .put("cardType", "order")
+    .put("orderId", "O8812345")
+    .put("title", "北欧实木沙发 等 2 件")
+    .put("total", money(359800))
+    .put("status", "shipped")
+    .put("createdAt", System.currentTimeMillis())
+    .put(
+      "items",
+      JSONArray()
+        .put(JSONObject().put("name", "北欧实木三人位沙发").put("quantity", 1).put("price", money(329900)))
+        .put(JSONObject().put("name", "亚麻抱枕 · 浅灰").put("quantity", 1).put("price", money(29900))),
+    )
 
   // ---------------- 演示用脚手架(接入时不需要)----------------
 

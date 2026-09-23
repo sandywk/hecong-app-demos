@@ -23,7 +23,7 @@ enum DemoConfig {
   #if DEBUG
   // local 档(仅 DEBUG):内部联调渠道 + 本地插座(PORT=5175 pnpm demo:link + 后端 3024/17108;
   // iOS 模拟器与宿主 Mac 共享网络 localhost 直通)。发布构建这段代码不存在。
-  private static let localChannelId: String? = "01a00edc-a820-71d1-bf6a-dd78a494ac79"
+  private static let localChannelId: String? = "01a0993a-ee67-768f-b7c8-7a8ce5f61b8d"
   private static let localLoaderUrl: String? = "http://localhost:5175/hecong-link.js"
   #else
   private static let localChannelId: String? = nil
